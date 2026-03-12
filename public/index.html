@@ -157,6 +157,24 @@ button{font-family:inherit}
 .copybtn{padding:12px 15px;border-radius:var(--r2);border:1.5px solid var(--border);background:var(--bg2);color:var(--ink2);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s}
 .copybtn:hover{border-color:var(--border2);color:var(--ink)}
 .copybtn.ok{border-color:var(--green);color:var(--green)}
+/* UPI */
+.upi-box{background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--r2);padding:20px;text-align:center;margin-bottom:14px}
+.upi-qr{width:180px;height:180px;margin:0 auto 14px;background:#fff;border-radius:var(--r);padding:8px;box-shadow:var(--sh)}
+.upi-qr img{width:100%;height:100%;object-fit:contain}
+.upi-id-row{display:flex;align-items:center;justify-content:center;gap:8px;background:#fff;border:1.5px solid var(--border);border-radius:var(--r);padding:10px 14px;margin-bottom:10px;cursor:pointer;transition:border-color .15s}
+.upi-id-row:hover{border-color:var(--saffron)}
+.upi-id-val{font-family:'DM Mono',monospace;font-size:13px;font-weight:600;color:var(--ink)}
+.upi-copy-ic{font-size:15px;color:var(--muted)}
+.upi-name{font-size:12px;color:var(--muted);margin-bottom:4px}
+.upi-amt{font-family:'Fraunces',serif;font-size:22px;font-weight:900;color:var(--fire);margin-bottom:8px}
+.upi-apps{display:flex;justify-content:center;gap:10px;margin:10px 0 4px}
+.upi-app-btn{display:flex;flex-direction:column;align-items:center;gap:4px;background:#fff;border:1.5px solid var(--border);border-radius:var(--r);padding:8px 14px;cursor:pointer;transition:all .15s;text-decoration:none;font-size:11px;font-weight:700;color:var(--ink2)}
+.upi-app-btn:hover{border-color:var(--saffron);transform:translateY(-1px)}
+.upi-app-ic{font-size:22px}
+.upi-note{font-size:11px;color:var(--muted);line-height:1.5;margin-top:8px}
+.upi-steps{display:flex;flex-direction:column;gap:7px;margin-bottom:14px}
+.upi-step{display:flex;align-items:center;gap:10px;background:var(--bg2);border-radius:var(--r);padding:9px 12px;font-size:12.5px;color:var(--ink2)}
+.upi-step-n{width:22px;height:22px;border-radius:50%;background:var(--fire);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .spbody{padding:36px 22px;text-align:center}
 .spinner{width:46px;height:46px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--fire);animation:spin .7s linear infinite;margin:0 auto 16px}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -283,13 +301,51 @@ button{font-family:inherit}
   </div>
 </div>
 
+<!-- UPI Payment Modal -->
+<div class="overlay" id="upiModal">
+  <div class="modal">
+    <div class="mpip"></div>
+    <div class="mhd">
+      <div class="mtitle">💳 Pay via UPI</div>
+      <button class="mx" id="upiModalClose">✕</button>
+    </div>
+    <div class="mbody">
+      <!-- Steps -->
+      <div class="upi-steps">
+        <div class="upi-step"><div class="upi-step-n">1</div>Scan QR or copy UPI ID to pay</div>
+        <div class="upi-step"><div class="upi-step-n">2</div>Enter exact amount shown below</div>
+        <div class="upi-step"><div class="upi-step-n">3</div>Click "Confirm on WhatsApp" with screenshot</div>
+      </div>
+      <!-- QR + UPI box -->
+      <div class="upi-box">
+        <div class="upi-name">Pay to · Zykaeats Kitchen</div>
+        <div class="upi-amt" id="upiAmt">₹0</div>
+        <div class="upi-qr" id="upiQR"></div>
+        <div class="upi-id-row" id="upiIdRow" title="Click to copy">
+          <span class="upi-id-val">glooka.llp2025@kotak</span>
+          <span class="upi-copy-ic">⎘</span>
+        </div>
+        <!-- Deep links for UPI apps -->
+        <div class="upi-apps">
+          <a class="upi-app-btn" id="gpayLink" target="_blank"><span class="upi-app-ic">🟢</span>GPay</a>
+          <a class="upi-app-btn" id="phonepeLink" target="_blank"><span class="upi-app-ic">🟣</span>PhonePe</a>
+          <a class="upi-app-btn" id="paytmLink" target="_blank"><span class="upi-app-ic">🔵</span>Paytm</a>
+        </div>
+        <div class="upi-note">📱 Open any UPI app → Scan QR or enter UPI ID<br>Make sure to pay the <strong>exact amount</strong></div>
+      </div>
+      <!-- Confirm via WhatsApp -->
+      <button class="pb pb-wa" id="upiConfirmWABtn">💬 Confirm Payment on WhatsApp</button>
+    </div>
+  </div>
+</div>
+
 <!-- Pay Spinner Modal -->
 <div class="overlay" id="payModal">
   <div class="modal">
     <div class="mpip"></div>
     <div class="spbody">
       <div class="spinner"></div>
-      <div class="splbl" id="payLbl">Creating order…</div>
+      <div class="splbl" id="payLbl">Processing…</div>
     </div>
   </div>
 </div>
@@ -315,13 +371,12 @@ button{font-family:inherit}
 </div>
 
 <div id="toast"></div>
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 'use strict';
 
 /* ── CONFIG ── */
-let CFG={restaurantName:'Zykaeats Cloud Kitchen',whatsappNumber:'919876543210',razorpayKeyId:'',freeDeliveryAt:299,deliveryFee:29,gstRate:0.05,razorpayEnabled:false};
+let CFG={restaurantName:'Zykaeats Cloud Kitchen',whatsappNumber:'919876543210',freeDeliveryAt:299,deliveryFee:29,gstRate:0.05};
 
 /* ── MENU STATE ── */
 let MENU=[],CATS=[],activeCat='all';
@@ -405,9 +460,7 @@ function cartHTML(){
       <div><label class="cf-lbl">Instructions</label><input class="cf-inp" id="cfNote" placeholder="Less spicy, extra chutney…" value="${esc(_c.note)}"></div>
     </div>
     <div class="pw">
-      ${CFG.razorpayEnabled
-        ?`<button class="pb pb-rzp" data-action="razorpay">💳 Pay ₹${tot} via Razorpay</button>`
-        :`<button class="pb pb-rzp" disabled title="Razorpay not configured" style="opacity:.5;cursor:not-allowed">💳 Razorpay (configure in .env)</button>`}
+      <button class="pb pb-rzp" data-action="upi">💳 Pay ₹${tot} via UPI</button>
       <div class="pay-or">or</div>
       <button class="pb pb-wa" data-action="whatsapp">💬 Order via WhatsApp</button>
     </div>`;
@@ -459,27 +512,64 @@ async function sendWA(){
 }
 function openWADirect(){window.open(`https://wa.me/${CFG.whatsappNumber}?text=${encodeURIComponent("Hi! I'd like to place an order from Zykaeats 🍽")}`,'_blank');}
 
-/* ── RAZORPAY ── */
-async function startRazorpay(){
-  if(!cartItems().length){showToast('Cart is empty!');return;}if(!formValid())return;
-  closeDrawer();openMod('payModal');document.getElementById('payLbl').textContent='Creating order…';
-  try{
-    const res=await fetch('/api/orders/create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({items:cartItems().map(i=>({id:i.id,name:i.name,price:i.price,qty:i.qty})),customer:_c,subtotal:subtotal(),deliveryFee:delivery(),gst:gstAmt(),total:orderTotal()})});
-    const data=await res.json();if(!res.ok)throw new Error(data.error||'Order creation failed');
-    document.getElementById('payLbl').textContent='Opening payment…';
-    closeMod('payModal');
-    const rzp=new Razorpay({key:data.razorpayKeyId,amount:data.amount,currency:'INR',name:CFG.restaurantName,description:`Order ${data.orderId}`,order_id:data.razorpayOrderId,prefill:{name:_c.name,contact:_c.phone},theme:{color:'#E8481A'},handler(r){verifyRazorpay(r,data.orderId);},modal:{ondismiss(){showToast('Payment cancelled');}}});
-    rzp.on('payment.failed',r=>showToast('❌ '+r.error.description));rzp.open();
-  }catch(err){closeMod('payModal');showToast('❌ '+err.message);}
+/* ── UPI ── */
+const UPI_ID='glooka.llp2025@kotak';
+const UPI_NAME='Zykaeats Kitchen';
+let _upiOrderId='';
+
+function buildUPIUrl(amount){
+  return`upi://pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(UPI_NAME)}&am=${amount}&cu=INR&tn=${encodeURIComponent('Zykaeats Order')}`;
 }
-async function verifyRazorpay(rzpR,orderId){
-  openMod('payModal');document.getElementById('payLbl').textContent='Verifying payment…';
+
+async function openUPIModal(){
+  if(!cartItems().length){showToast('Cart is empty!');return;}
+  if(!formValid())return;
+  saveCust();
+  const tot=orderTotal();
+  _upiOrderId='ZKU-'+Date.now().toString(36).toUpperCase();
+
+  // Save order to backend
   try{
-    const res=await fetch('/api/orders/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderId,razorpayOrderId:rzpR.razorpay_order_id,razorpayPaymentId:rzpR.razorpay_payment_id,razorpaySignature:rzpR.razorpay_signature})});
-    const data=await res.json();closeMod('payModal');
-    if(!res.ok)throw new Error(data.error||'Verification failed');
-    showSuccess(orderId);
-  }catch(err){closeMod('payModal');showToast('❌ '+err.message);}
+    await fetch('/api/orders/whatsapp',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({items:cartItems().map(i=>({id:i.id,name:i.name,price:i.price,qty:i.qty,emoji:i.emoji})),
+      customer:_c,subtotal:subtotal(),deliveryFee:delivery(),gst:gstAmt(),total:tot})});
+  }catch(_){}
+
+  // Set amount
+  document.getElementById('upiAmt').textContent=`₹${tot}`;
+
+  // Generate QR code
+  const qrEl=document.getElementById('upiQR');
+  qrEl.innerHTML='';
+  new QRCode(qrEl,{text:buildUPIUrl(tot),width:164,height:164,colorDark:'#18150F',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
+
+  // Set UPI app deep links
+  const upiUrl=buildUPIUrl(tot);
+  document.getElementById('gpayLink').href=upiUrl;
+  document.getElementById('phonepeLink').href=upiUrl;
+  document.getElementById('paytmLink').href=upiUrl;
+
+  closeDrawer();
+  openMod('upiModal');
+}
+
+function copyUPIId(){
+  navigator.clipboard.writeText(UPI_ID).then(()=>{
+    const row=document.getElementById('upiIdRow');
+    row.querySelector('.upi-copy-ic').textContent='✓';
+    row.style.borderColor='var(--green)';
+    setTimeout(()=>{row.querySelector('.upi-copy-ic').textContent='⎘';row.style.borderColor='';},2000);
+  });
+}
+
+function confirmUPIOnWhatsApp(){
+  const tot=orderTotal()||document.getElementById('upiAmt').textContent.replace('₹','');
+  const ts=new Date().toLocaleString('en-IN',{dateStyle:'medium',timeStyle:'short'});
+  const lines=cartItems().map(i=>`  ${i.emoji||''} ${i.name} × ${i.qty}  —  ₹${i.price*i.qty}`).join('\n');
+  const msg=`💳 *UPI PAYMENT CONFIRMATION — ${UPI_NAME}*\n━━━━━━━━━━━━━━━━━━━━\n🔖 *Order:* \`${_upiOrderId}\`\n📅 ${ts}\n━━━━━━━━━━━━━━━━━━━━\n\n👤 *Customer*\nName:    ${_c.name||'—'}\nPhone:   ${_c.phone||'—'}\nAddress: ${_c.addr||'—'}${_c.note?'\n📝 Note: '+_c.note:''}\n━━━━━━━━━━━━━━━━━━━━\n🍽 *Order Items*\n${lines}\n━━━━━━━━━━━━━━━━━━━━\n*TOTAL PAID: ₹${tot}*\nUPI ID: ${UPI_ID}\n━━━━━━━━━━━━━━━━━━━━\n✅ I have completed the UPI payment. Please confirm! 🙏\n\n_Via zykaeats.in_`;
+  window.open(`https://wa.me/${CFG.whatsappNumber}?text=${encodeURIComponent(msg)}`,'_blank');
+  closeMod('upiModal');
+  showSuccess(_upiOrderId);
 }
 
 /* ── SUCCESS ── */
@@ -501,7 +591,7 @@ function handleDelegatedClick(e){
   if(action==='add'){addItem(btn.dataset.id);}
   else if(action==='qty'){setQty(btn.dataset.id,Number(btn.dataset.qty));}
   else if(action==='clear'){clearCart();}
-  else if(action==='razorpay'){saveCust();startRazorpay();}
+  else if(action==='upi'){saveCust();openUPIModal();}
   else if(action==='whatsapp'){saveCust();openWAPreview();}
 }
 document.getElementById('menuCol').addEventListener('click',handleDelegatedClick);
@@ -527,6 +617,12 @@ document.addEventListener('DOMContentLoaded',function(){
 
   // Success modal
   document.getElementById('orderMoreBtn').addEventListener('click',afterSuccess);
+
+  // UPI modal
+  document.getElementById('upiModal').addEventListener('click',function(e){if(e.target===this)closeMod('upiModal');});
+  document.getElementById('upiModalClose').addEventListener('click',function(){closeMod('upiModal');});
+  document.getElementById('upiIdRow').addEventListener('click',copyUPIId);
+  document.getElementById('upiConfirmWABtn').addEventListener('click',confirmUPIOnWhatsApp);
 });
 
 /* ── BOOTSTRAP ── */
