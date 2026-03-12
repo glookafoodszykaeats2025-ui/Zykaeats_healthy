@@ -371,7 +371,6 @@ button{font-family:inherit}
 </div>
 
 <div id="toast"></div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 'use strict';
 
@@ -538,13 +537,12 @@ async function openUPIModal(){
   // Set amount
   document.getElementById('upiAmt').textContent=`₹${tot}`;
 
-  // Generate QR code
+  // Generate QR code via Google Charts API (no library needed)
   const qrEl=document.getElementById('upiQR');
-  qrEl.innerHTML='';
-  new QRCode(qrEl,{text:buildUPIUrl(tot),width:164,height:164,colorDark:'#18150F',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
+  const upiUrl=buildUPIUrl(tot);
+  qrEl.innerHTML=`<img src="https://chart.googleapis.com/chart?cht=qr&chs=164x164&chl=${encodeURIComponent(upiUrl)}&choe=UTF-8" alt="UPI QR Code" style="width:164px;height:164px;display:block;margin:0 auto">`;
 
   // Set UPI app deep links
-  const upiUrl=buildUPIUrl(tot);
   document.getElementById('gpayLink').href=upiUrl;
   document.getElementById('phonepeLink').href=upiUrl;
   document.getElementById('paytmLink').href=upiUrl;
