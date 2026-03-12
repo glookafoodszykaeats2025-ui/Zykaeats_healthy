@@ -17,13 +17,14 @@ const PORT = process.env.PORT || 3000;
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
-      defaultSrc:  ["'self'"],
-      scriptSrc:   ["'self'", "'unsafe-inline'", 'https://checkout.razorpay.com', 'https://fonts.googleapis.com'],
-      styleSrc:    ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
-      fontSrc:     ["'self'", 'https://fonts.gstatic.com'],
-      connectSrc:  ["'self'", 'https://api.razorpay.com'],
-      frameSrc:    ['https://api.razorpay.com'],
-      imgSrc:      ["'self'", 'data:', 'https:'],
+      defaultSrc:    ["'self'"],
+      scriptSrc:     ["'self'", "'unsafe-inline'", 'https://checkout.razorpay.com', 'https://fonts.googleapis.com'],
+      scriptSrcAttr: ["'unsafe-inline'"],
+      styleSrc:      ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+      fontSrc:       ["'self'", 'https://fonts.gstatic.com'],
+      connectSrc:    ["'self'", 'https://api.razorpay.com'],
+      frameSrc:      ['https://api.razorpay.com'],
+      imgSrc:        ["'self'", 'data:', 'https:'],
     },
   },
 }));
