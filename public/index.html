@@ -196,6 +196,39 @@ button{font-family:inherit}
 .ss{display:flex;flex-direction:column;align-items:center;gap:5px}
 .ss-ic{width:40px;height:40px;border-radius:50%;background:var(--bg2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:17px}
 .ss-lb{font-size:10px;color:var(--muted);font-weight:600;max-width:62px;text-align:center;line-height:1.4}
+/* ── INVOICE ── */
+.inv-modal{max-width:520px;max-height:90vh;overflow-y:auto}
+.inv-modal .mhd{position:sticky;top:0;z-index:2;background:var(--surface);border-bottom:1px solid var(--border)}
+.inv-wrap{padding:24px;font-family:'DM Sans',sans-serif;font-size:13px;color:#111;background:#fff}
+.inv-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;padding-bottom:14px;border-bottom:2px solid #111}
+.inv-brand{font-family:'Fraunces',serif;font-size:22px;font-weight:900;color:#111;margin-bottom:2px}
+.inv-gstin{font-size:10px;font-family:'DM Mono',monospace;color:#555;margin-bottom:4px}
+.inv-addr{font-size:11px;color:#555;line-height:1.5;max-width:200px}
+.inv-badge{text-align:right}
+.inv-badge .inv-title{font-size:18px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#111}
+.inv-badge .inv-num{font-size:11px;color:#555;margin-top:4px;font-family:'DM Mono',monospace}
+.inv-badge .inv-date{font-size:11px;color:#555;font-family:'DM Mono',monospace}
+.inv-section{margin-bottom:14px}
+.inv-section-title{font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#888;margin-bottom:6px}
+.inv-bill{background:#f8f6f2;border-radius:6px;padding:10px 13px;font-size:12px;line-height:1.7}
+.inv-table{width:100%;border-collapse:collapse;margin:14px 0}
+.inv-table th{font-size:9px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:#888;padding:6px 8px;border-bottom:1px solid #ddd;text-align:left}
+.inv-table th:last-child,.inv-table td:last-child{text-align:right}
+.inv-table td{padding:7px 8px;border-bottom:1px solid #eee;font-size:12px;vertical-align:top}
+.inv-table tr:last-child td{border-bottom:none}
+.inv-totals{margin-left:auto;width:200px}
+.inv-totals tr td{padding:3px 0;font-size:12px}
+.inv-totals tr td:last-child{text-align:right;font-family:'DM Mono',monospace}
+.inv-total-row td{font-weight:800;font-size:14px;border-top:2px solid #111;padding-top:7px!important}
+.inv-footer{margin-top:18px;padding-top:14px;border-top:1px solid #ddd;text-align:center;font-size:10px;color:#999;line-height:1.7}
+.inv-paid{display:inline-block;border:2px solid #1b7a47;color:#1b7a47;border-radius:4px;padding:2px 10px;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;transform:rotate(-2deg)}
+@media print{
+  body > *:not(#invModal){display:none!important}
+  .overlay{position:static!important;background:none!important}
+  .modal{box-shadow:none!important;max-height:none!important;border-radius:0!important}
+  .mhd{display:none!important}
+  .inv-wrap{padding:0}
+}
 #reviews{background:var(--cream);padding:clamp(40px,6vw,68px) clamp(14px,5vw,64px);border-top:1px solid var(--border)}
 .rev-hd{font-family:'Fraunces',serif;font-size:28px;font-weight:900;color:var(--ink);margin-bottom:5px}
 .rev-sub{font-size:14px;color:var(--muted);margin-bottom:26px}
@@ -369,11 +402,28 @@ button{font-family:inherit}
         <div class="ss"><div class="ss-ic">🛵</div><div class="ss-lb">Out for delivery</div></div>
       </div>
       <button class="btn btn-f" id="orderMoreBtn" style="margin:0 auto">🍽 Order More</button>
+      <button class="copybtn" id="viewInvBtn" style="margin:8px auto 0;display:block">🧾 View Invoice</button>
     </div>
   </div>
 </div>
 
-<div id="toast"></div>
+<!-- Invoice Modal -->
+<div class="overlay" id="invModal">
+  <div class="modal inv-modal">
+    <div class="mhd">
+      <div class="mtitle">🧾 Tax Invoice</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="copybtn" id="invPrintBtn">🖨 Print / Save PDF</button>
+        <button class="mx" id="invModalClose">✕</button>
+      </div>
+    </div>
+    <div class="mbody" style="padding:0">
+      <div id="invContent"></div>
+    </div>
+  </div>
+</div>
+
+
 
 
 <script>
@@ -520,6 +570,7 @@ function copyWA(){navigator.clipboard.writeText(document.getElementById('waText'
 async function sendWA(){
   try{await fetch('/api/orders/whatsapp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({items:cartItems().map(i=>({id:i.id,name:i.name,price:i.price,qty:i.qty,emoji:i.emoji})),customer:_c,subtotal:subtotal(),deliveryFee:delivery(),gst:gstAmt(),total:orderTotal()})});}catch(_){}
   window.open('https://wa.me/'+CFG.whatsappNumber+'?text='+encodeURIComponent(document.getElementById('waText').textContent),'_blank');
+  buildInvoice(_pid,cartItems(),_c,subtotal(),delivery(),gstAmt(),orderTotal(),'WhatsApp Order');
   closeMod('waModal');showSuccess(_pid);
 }
 function openWADirect(){window.open('https://wa.me/'+CFG.whatsappNumber+'?text='+encodeURIComponent("Hi! I'd like to place an order from Zykaeats 🍽"),'_blank');}
@@ -658,6 +709,175 @@ function makeQRMatrix(text,version,ec){
   return m;
 }
 
+/* ── INVOICE ── */
+const SELLER={
+  name:'Zykaeats Cloud Kitchen',
+  legal:'GLOOKA FOODS LLP',
+  gstin:'29ABDFG2122K1ZH',
+  address:'Building No. 285, ITI Layout, Yellukunte Road',
+  locality:'Bommanahalli, Bengaluru Urban',
+  city:'Bengaluru, Karnataka — 560068',
+  state:'Karnataka (29)',
+  upi:UPI_ID
+};
+let _lastInvoice=null;
+
+function buildInvoice(orderId,items,customer,sub,del,gst,tot,payMode){
+  const now=new Date();
+  const date=now.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+  const time=now.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+  const invNum='INV-'+Date.now().toString(36).toUpperCase();
+  _lastInvoice={orderId,invNum,date,time,items,customer,sub,del,gst,tot,payMode};
+  return _lastInvoice;
+}
+
+function renderInvoiceHTML(inv){
+  const rows=inv.items.map(i=>`
+    <tr>
+      <td>${i.emoji||''} ${i.name}</td>
+      <td style="text-align:right">${i.qty}</td>
+      <td style="text-align:right">₹${i.price}</td>
+      <td>₹${i.price*i.qty}</td>
+    </tr>`).join('');
+  return`<div class="inv-wrap" id="invPrintArea">
+    <div class="inv-header">
+      <div>
+        <div class="inv-brand">${SELLER.name}</div>
+        <div class="inv-gstin">GSTIN: ${SELLER.gstin}</div>
+        <div class="inv-addr">${SELLER.legal}<br>${SELLER.address}<br>${SELLER.locality}<br>${SELLER.city}</div>
+      </div>
+      <div class="inv-badge">
+        <div class="inv-title">Invoice</div>
+        <div class="inv-num">${inv.invNum}</div>
+        <div class="inv-date">${inv.date}, ${inv.time}</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+      <div class="inv-section">
+        <div class="inv-section-title">Bill To</div>
+        <div class="inv-bill">
+          <strong>${inv.customer.name||'—'}</strong><br>
+          ${inv.customer.phone||''}<br>
+          ${inv.customer.addr||''}
+        </div>
+      </div>
+      <div class="inv-section">
+        <div class="inv-section-title">Order Details</div>
+        <div class="inv-bill">
+          <strong>Order ID:</strong> ${inv.orderId}<br>
+          <strong>Payment:</strong> ${inv.payMode}<br>
+          <strong>UPI:</strong> ${SELLER.upi}
+        </div>
+      </div>
+    </div>
+
+    <table class="inv-table">
+      <thead><tr>
+        <th>Item</th><th style="text-align:right">Qty</th>
+        <th style="text-align:right">Rate</th><th style="text-align:right">Amount</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+
+    <table class="inv-totals" style="margin-left:auto;border-collapse:collapse">
+      <tr><td>Subtotal</td><td>₹${inv.sub}</td></tr>
+      <tr><td>Delivery</td><td>${inv.del===0?'FREE':'₹'+inv.del}</td></tr>
+      <tr><td>CGST (2.5%)</td><td>₹${(inv.gst/2).toFixed(2)}</td></tr>
+      <tr><td>SGST (2.5%)</td><td>₹${(inv.gst/2).toFixed(2)}</td></tr>
+      <tr class="inv-total-row"><td><strong>Total</strong></td><td><strong>₹${inv.tot}</strong></td></tr>
+    </table>
+
+    <div class="inv-footer">
+      <div class="inv-paid">✓ PAID</div><br>
+      Thank you for ordering from ${SELLER.name}!<br>
+      This is a computer-generated invoice — no signature required.<br>
+      <strong>${SELLER.legal}</strong> · GSTIN ${SELLER.gstin}<br>
+      ${SELLER.address}, ${SELLER.locality}, ${SELLER.city}
+    </div>
+  </div>`;
+}
+
+function showInvoice(){
+  if(!_lastInvoice)return;
+  document.getElementById('invContent').innerHTML=renderInvoiceHTML(_lastInvoice);
+  openMod('invModal');
+}
+
+function printInvoice(){
+  const area=document.getElementById('invPrintArea');
+  if(!area)return;
+  const w=window.open('','_blank','width=600,height=800');
+  w.document.write(`<!DOCTYPE html><html><head><title>Invoice ${_lastInvoice.invNum}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@900&family=DM+Sans:wght@400;700&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'DM Sans',sans-serif;font-size:13px;color:#111;padding:32px;max-width:560px;margin:auto}
+    .inv-brand{font-family:'Fraunces',serif;font-size:22px;font-weight:900}
+    .inv-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;padding-bottom:14px;border-bottom:2px solid #111}
+    .inv-gstin{font-size:10px;font-family:monospace;color:#555;margin:2px 0 4px}
+    .inv-addr{font-size:11px;color:#555;line-height:1.5}
+    .inv-badge{text-align:right}
+    .inv-title{font-size:18px;font-weight:800;letter-spacing:2px;text-transform:uppercase}
+    .inv-num,.inv-date{font-size:11px;color:#555;font-family:monospace;margin-top:3px}
+    .inv-section-title{font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#888;margin-bottom:5px}
+    .inv-bill{background:#f8f6f2;border-radius:6px;padding:10px 13px;font-size:12px;line-height:1.7}
+    .inv-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+    table{width:100%;border-collapse:collapse;margin:14px 0}
+    th{font-size:9px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:#888;padding:6px 8px;border-bottom:1px solid #ddd;text-align:left}
+    th:last-child,td:last-child{text-align:right}
+    td{padding:7px 8px;border-bottom:1px solid #eee;font-size:12px}
+    .totals{width:200px;margin-left:auto;border-collapse:collapse}
+    .totals td{padding:3px 0;font-size:12px}
+    .totals td:last-child{text-align:right;font-family:monospace}
+    .total-row td{font-weight:800;font-size:14px;border-top:2px solid #111;padding-top:7px}
+    .inv-footer{margin-top:18px;padding-top:14px;border-top:1px solid #ddd;text-align:center;font-size:10px;color:#999;line-height:1.7}
+    .inv-paid{display:inline-block;border:2px solid #1b7a47;color:#1b7a47;border-radius:4px;padding:2px 10px;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
+  </style></head><body>
+    <div class="inv-header">
+      <div>
+        <div class="inv-brand">${SELLER.name}</div>
+        <div class="inv-gstin">GSTIN: ${SELLER.gstin}</div>
+        <div class="inv-addr">${SELLER.legal}<br>${SELLER.address}<br>${SELLER.locality}<br>${SELLER.city}</div>
+      </div>
+      <div class="inv-badge">
+        <div class="inv-title">Invoice</div>
+        <div class="inv-num">${_lastInvoice.invNum}</div>
+        <div class="inv-date">${_lastInvoice.date}, ${_lastInvoice.time}</div>
+      </div>
+    </div>
+    <div class="inv-grid">
+      <div><div class="inv-section-title">Bill To</div>
+        <div class="inv-bill"><strong>${_lastInvoice.customer.name||'—'}</strong><br>${_lastInvoice.customer.phone||''}<br>${_lastInvoice.customer.addr||''}</div>
+      </div>
+      <div><div class="inv-section-title">Order Details</div>
+        <div class="inv-bill"><strong>Order:</strong> ${_lastInvoice.orderId}<br><strong>Payment:</strong> ${_lastInvoice.payMode}<br><strong>UPI:</strong> ${SELLER.upi}</div>
+      </div>
+    </div>
+    <table>
+      <thead><tr><th>Item</th><th style="text-align:right">Qty</th><th style="text-align:right">Rate</th><th style="text-align:right">Amount</th></tr></thead>
+      <tbody>${_lastInvoice.items.map(i=>`<tr><td>${i.emoji||''} ${i.name}</td><td style="text-align:right">${i.qty}</td><td style="text-align:right">₹${i.price}</td><td>₹${i.price*i.qty}</td></tr>`).join('')}</tbody>
+    </table>
+    <table class="totals">
+      <tr><td>Subtotal</td><td>₹${_lastInvoice.sub}</td></tr>
+      <tr><td>Delivery</td><td>${_lastInvoice.del===0?'FREE':'₹'+_lastInvoice.del}</td></tr>
+      <tr><td>CGST (2.5%)</td><td>₹${(_lastInvoice.gst/2).toFixed(2)}</td></tr>
+      <tr><td>SGST (2.5%)</td><td>₹${(_lastInvoice.gst/2).toFixed(2)}</td></tr>
+      <tr class="total-row"><td><strong>Total</strong></td><td><strong>₹${_lastInvoice.tot}</strong></td></tr>
+    </table>
+    <div class="inv-footer">
+      <div class="inv-paid">✓ PAID</div><br>
+      Thank you for ordering from ${SELLER.name}!<br>
+      Computer-generated invoice — no signature required.<br>
+      <strong>${SELLER.legal}</strong> · GSTIN ${SELLER.gstin}<br>
+      ${SELLER.address}, ${SELLER.locality}, ${SELLER.city}
+    </div>
+  </body></html>`);
+  w.document.close();
+  w.focus();
+  setTimeout(()=>w.print(),600);
+}
+
 /* ── GEOLOCATION ── */
 function getMyLocation(){
   const btn=document.querySelector('[data-action="getloc"]');
@@ -739,6 +959,7 @@ function confirmUPIOnWhatsApp(){
   const msg=`💳 *UPI PAYMENT — ${UPI_NAME}*\n━━━━━━━━━━━━━━━━━━━━\n🔖 *Order:* ${_upiOrderId}\n📅 ${ts}\n━━━━━━━━━━━━━━━━━━━━\n👤 *Customer*\nName: ${_c.name||'—'}\nPhone: ${_c.phone||'—'}\nAddress: ${_c.addr||'—'}${_c.maps?'\n📍 Maps: '+_c.maps:''}${_c.note?'\nNote: '+_c.note:''}\n━━━━━━━━━━━━━━━━━━━━\n🍽 *Items*\n${lines}\n━━━━━━━━━━━━━━━━━━━━\n*TOTAL PAID: Rs.${tot}*\nUPI ID: ${UPI_ID}\n━━━━━━━━━━━━━━━━━━━━\n✅ Payment done! Please confirm 🙏`;
   window.open('https://wa.me/'+CFG.whatsappNumber+'?text='+encodeURIComponent(msg),'_blank');
   closeMod('upiModal');
+  buildInvoice(_upiOrderId,cartItems(),_c,subtotal(),delivery(),gstAmt(),orderTotal(),'UPI · '+UPI_ID);
   showSuccess(_upiOrderId);
 }
 
@@ -781,6 +1002,10 @@ document.addEventListener('DOMContentLoaded',function(){
   document.getElementById('copyBtn').addEventListener('click',copyWA);
   document.getElementById('sendWABtn').addEventListener('click',sendWA);
   document.getElementById('orderMoreBtn').addEventListener('click',afterSuccess);
+  document.getElementById('viewInvBtn').addEventListener('click',showInvoice);
+  document.getElementById('invModalClose').addEventListener('click',function(){closeMod('invModal');});
+  document.getElementById('invModal').addEventListener('click',function(e){if(e.target===this)closeMod('invModal');});
+  document.getElementById('invPrintBtn').addEventListener('click',printInvoice);
   document.getElementById('upiModal').addEventListener('click',function(e){if(e.target===this)closeMod('upiModal');});
   document.getElementById('upiModalClose').addEventListener('click',function(){closeMod('upiModal');});
   document.getElementById('upiIdRow').addEventListener('click',copyUPIId);
