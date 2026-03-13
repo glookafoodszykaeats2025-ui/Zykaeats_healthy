@@ -9,6 +9,7 @@ const rateLimit   = require('express-rate-limit');
 
 const menuRouter   = require('./routes/menu');
 const ordersRouter = require('./routes/orders');
+const usersRouter  = require('./routes/users');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -81,6 +82,7 @@ app.get('/api/config', (req, res) => {
 // ── API routes ───────────────────────────────────────────
 app.use('/api/menu',   apiLimiter, menuRouter);
 app.use('/api/orders', orderLimiter, ordersRouter);
+app.use('/api/users',  apiLimiter, usersRouter);
 
 // ── Admin panel ──────────────────────────────────────────
 app.get('/admin', (req, res) => {
