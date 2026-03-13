@@ -196,6 +196,36 @@ button{font-family:inherit}
 .ss{display:flex;flex-direction:column;align-items:center;gap:5px}
 .ss-ic{width:40px;height:40px;border-radius:50%;background:var(--bg2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:17px}
 .ss-lb{font-size:10px;color:var(--muted);font-weight:600;max-width:62px;text-align:center;line-height:1.4}
+/* ── SIGNUP MODAL ── */
+.signup-modal{max-width:480px;overflow:hidden}
+.su-hero{background:linear-gradient(135deg,var(--ink) 0%,#2d2416 100%);padding:32px 24px 24px;text-align:center;position:relative}
+.su-hero::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 70% 30%,rgba(245,166,35,.18),transparent 60%);pointer-events:none}
+.su-logo{font-size:40px;margin-bottom:10px;position:relative;z-index:1}
+.su-title{font-family:'Fraunces',serif;font-size:24px;font-weight:900;color:var(--cream);margin-bottom:7px;position:relative;z-index:1}
+.su-sub{font-size:12.5px;color:rgba(255,255,255,.5);line-height:1.65;position:relative;z-index:1}
+.su-body{padding:22px 22px 28px}
+.su-steps{display:flex;justify-content:center;gap:7px;margin-bottom:18px}
+.su-step{width:28px;height:4px;border-radius:100px;background:var(--border);transition:background .3s,width .3s}
+.su-step.active{background:var(--fire);width:44px}
+.su-section-lbl{font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.su-fields{display:flex;flex-direction:column;gap:11px;margin-bottom:18px}
+.su-field{display:flex;flex-direction:column;gap:4px}
+.su-lbl{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted)}
+.su-inp{width:100%;background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--r);padding:9px 12px;font-family:'DM Sans',sans-serif;font-size:13.5px;color:var(--ink);outline:none;transition:border-color .15s,box-shadow .15s;resize:none}
+.su-inp:focus{border-color:var(--fire);box-shadow:0 0 0 3px rgba(232,72,26,.1)}
+.su-inp::placeholder{color:var(--muted)}
+.su-sel{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238A7A62' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;cursor:pointer}
+.su-ta{resize:vertical;min-height:62px}
+.su-next{width:100%;padding:13px;background:var(--fire);color:#fff;border:none;border-radius:var(--r);font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:background .18s,transform .15s}
+.su-next:hover{background:var(--fire-d);transform:translateY(-1px)}
+.su-cuisine-lbl{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:12px}
+.su-cuisines{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.su-ctag{padding:8px 14px;background:var(--bg2);border:1.5px solid var(--border);border-radius:100px;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;user-select:none}
+.su-ctag:hover{border-color:var(--fire);color:var(--fire)}
+.su-ctag.picked{background:rgba(232,72,26,.1);border-color:var(--fire);color:var(--fire);font-weight:700}
+.su-back-row{display:flex;gap:10px;align-items:center}
+.su-back{padding:13px 18px;background:var(--bg2);color:var(--ink);border:1.5px solid var(--border);border-radius:var(--r);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap}
+.su-back:hover{border-color:var(--border2);background:var(--border)}
 /* ── INVOICE ── */
 .inv-modal{max-width:520px;max-height:90vh;overflow-y:auto}
 .inv-modal .mhd{position:sticky;top:0;z-index:2;background:var(--surface);border-bottom:1px solid var(--border)}
@@ -403,6 +433,79 @@ button{font-family:inherit}
       </div>
       <button class="btn btn-f" id="orderMoreBtn" style="margin:0 auto">🍽 Order More</button>
       <button class="copybtn" id="viewInvBtn" style="margin:8px auto 0;display:block">🧾 View Invoice</button>
+    </div>
+  </div>
+</div>
+
+<!-- Signup Modal -->
+<div class="overlay" id="signupModal">
+  <div class="modal signup-modal">
+    <div class="mpip"></div>
+    <div class="su-hero">
+      <div class="su-logo">🔥</div>
+      <div class="su-title">Welcome to Zykaeats!</div>
+      <div class="su-sub">Fresh homestyle meals · Delivered in 30 mins<br>Tell us a bit about yourself to get started</div>
+    </div>
+    <div class="su-body">
+      <div class="su-steps"><div class="su-step active" id="suStep1Dot"></div><div class="su-step" id="suStep2Dot"></div></div>
+
+      <!-- Step 1: Basic Info -->
+      <div id="suPage1">
+        <div class="su-section-lbl">Step 1 of 2 — Your Details</div>
+        <div class="su-fields">
+          <div class="su-field">
+            <label class="su-lbl">Full Name *</label>
+            <input class="su-inp" id="suName" placeholder="e.g. Priya Sharma" type="text">
+          </div>
+          <div class="su-field">
+            <label class="su-lbl">Phone Number *</label>
+            <input class="su-inp" id="suPhone" placeholder="+91 98765 43210" type="tel">
+          </div>
+          <div class="su-field">
+            <label class="su-lbl">Email Address</label>
+            <input class="su-inp" id="suEmail" placeholder="you@example.com" type="email">
+          </div>
+          <div class="su-field">
+            <label class="su-lbl">Delivery Address</label>
+            <textarea class="su-inp su-ta" id="suAddr" placeholder="Flat no, building, street, locality, Bangalore" rows="2"></textarea>
+          </div>
+          <div class="su-field">
+            <label class="su-lbl">State</label>
+            <select class="su-inp su-sel" id="suState">
+              <option value="">Select your state…</option>
+              <option value="Karnataka" selected>Karnataka</option>
+              <option value="Andhra Pradesh">Andhra Pradesh</option>
+              <option value="Telangana">Telangana</option>
+              <option value="Tamil Nadu">Tamil Nadu</option>
+              <option value="Kerala">Kerala</option>
+              <option value="Maharashtra">Maharashtra</option>
+              <option value="Delhi">Delhi</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+        <button class="su-next" id="suNext1">Continue →</button>
+      </div>
+
+      <!-- Step 2: Cuisine Preferences -->
+      <div id="suPage2" style="display:none">
+        <div class="su-section-lbl">Step 2 of 2 — Your Tastes</div>
+        <div class="su-cuisine-lbl">Which cuisines do you love? <span style="font-weight:400;color:var(--muted)">(pick all that apply)</span></div>
+        <div class="su-cuisines" id="suCuisines">
+          <div class="su-ctag" data-cuisine="Biryani">🍚 Biryani</div>
+          <div class="su-ctag" data-cuisine="North Indian">🥘 North Indian</div>
+          <div class="su-ctag" data-cuisine="South Indian">🍛 South Indian</div>
+          <div class="su-ctag" data-cuisine="Chinese">🥡 Chinese</div>
+          <div class="su-ctag" data-cuisine="Continental">🍝 Continental</div>
+          <div class="su-ctag" data-cuisine="Street Food">🌮 Street Food</div>
+          <div class="su-ctag" data-cuisine="Desserts">🍮 Desserts</div>
+          <div class="su-ctag" data-cuisine="Healthy">🥗 Healthy</div>
+        </div>
+        <div class="su-back-row">
+          <button class="su-back" id="suBack2">← Back</button>
+          <button class="su-next" id="suSubmit" style="flex:1">🎉 Start Ordering!</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -880,6 +983,68 @@ function printInvoice(){
   setTimeout(()=>w.print(),600);
 }
 
+/* ── SIGNUP ── */
+const SIGNUP_KEY='zke_user_v1';
+
+function loadUser(){
+  try{return JSON.parse(localStorage.getItem(SIGNUP_KEY)||'null');}catch(e){return null;}
+}
+function saveUser(data){
+  try{localStorage.setItem(SIGNUP_KEY,JSON.stringify(data));}catch(e){}
+}
+
+function initSignup(){
+  const user=loadUser();
+  if(user){
+    // Pre-fill cart form with saved details
+    _c.name=user.name||'';
+    _c.phone=user.phone||'';
+    _c.addr=user.addr||'';
+    return; // already signed up
+  }
+  // Show after 800ms so page loads first
+  setTimeout(()=>openMod('signupModal'),800);
+}
+
+function suGoPage2(){
+  const name=(document.getElementById('suName').value||'').trim();
+  const phone=(document.getElementById('suPhone').value||'').trim();
+  if(!name){showToast('⚠️ Please enter your name');document.getElementById('suName').focus();return;}
+  if(!phone){showToast('⚠️ Please enter your phone');document.getElementById('suPhone').focus();return;}
+  document.getElementById('suPage1').style.display='none';
+  document.getElementById('suPage2').style.display='block';
+  document.getElementById('suStep1Dot').classList.remove('active');
+  document.getElementById('suStep2Dot').classList.add('active');
+  document.querySelector('.signup-modal').scrollTop=0;
+}
+
+function suGoPage1(){
+  document.getElementById('suPage2').style.display='none';
+  document.getElementById('suPage1').style.display='block';
+  document.getElementById('suStep2Dot').classList.remove('active');
+  document.getElementById('suStep1Dot').classList.add('active');
+}
+
+function suSubmit(){
+  const cuisines=[...document.querySelectorAll('.su-ctag.picked')].map(t=>t.dataset.cuisine);
+  const user={
+    name:(document.getElementById('suName').value||'').trim(),
+    phone:(document.getElementById('suPhone').value||'').trim(),
+    email:(document.getElementById('suEmail').value||'').trim(),
+    addr:(document.getElementById('suAddr').value||'').trim(),
+    state:(document.getElementById('suState').value||''),
+    cuisines,
+    joinedAt:new Date().toISOString()
+  };
+  saveUser(user);
+  // Pre-fill cart form
+  _c.name=user.name;_c.phone=user.phone;_c.addr=user.addr;
+  closeMod('signupModal');
+  showToast(`👋 Welcome, ${user.name.split(' ')[0]}!`);
+  // Send to backend
+  fetch('/api/users/signup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(user)}).catch(()=>{});
+}
+
 /* ── GEOLOCATION ── */
 function getMyLocation(){
   const btn=document.querySelector('[data-action="getloc"]');
@@ -1002,7 +1167,23 @@ document.addEventListener('DOMContentLoaded',function(){
   document.getElementById('waModalClose').addEventListener('click',function(){closeMod('waModal');});
   document.getElementById('copyBtn').addEventListener('click',copyWA);
   document.getElementById('sendWABtn').addEventListener('click',sendWA);
+  document.getElementById('suNext1').addEventListener('click',suGoPage2);
+  document.getElementById('suBack2').addEventListener('click',suGoPage1);
+  document.getElementById('suSubmit').addEventListener('click',suSubmit);
+  document.getElementById('suCuisines').addEventListener('click',function(e){
+    const tag=e.target.closest('.su-ctag');if(!tag)return;
+    tag.classList.toggle('picked');
+  });
+  // Signup modal — no close button intentionally (first-visit gate)
+  // but allow skip via clicking backdrop after 5s
+  setTimeout(()=>{
+    const el=document.getElementById('signupModal');
+    if(el)el.addEventListener('click',function(e){
+      if(e.target===this){closeMod('signupModal');saveUser({name:'Guest',skipped:true,joinedAt:new Date().toISOString()});}
+    });
+  },5000);
   document.getElementById('orderMoreBtn').addEventListener('click',afterSuccess);
+  initSignup();
   document.getElementById('viewInvBtn').addEventListener('click',showInvoice);
   document.getElementById('invModalClose').addEventListener('click',function(){closeMod('invModal');});
   document.getElementById('invModal').addEventListener('click',function(e){if(e.target===this)closeMod('invModal');});
