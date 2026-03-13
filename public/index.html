@@ -158,23 +158,23 @@ button{font-family:inherit}
 .copybtn:hover{border-color:var(--border2);color:var(--ink)}
 .copybtn.ok{border-color:var(--green);color:var(--green)}
 /* UPI */
+.upi-steps{display:flex;flex-direction:column;gap:7px;margin-bottom:14px}
+.upi-step{display:flex;align-items:center;gap:10px;background:var(--bg2);border-radius:var(--r);padding:9px 12px;font-size:12.5px;color:var(--ink2)}
+.upi-step-n{width:22px;height:22px;border-radius:50%;background:var(--fire);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .upi-box{background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--r2);padding:20px;text-align:center;margin-bottom:14px}
-.upi-qr{width:180px;height:180px;margin:0 auto 14px;background:#fff;border-radius:var(--r);padding:8px;box-shadow:var(--sh)}
-.upi-qr img{width:100%;height:100%;object-fit:contain}
+.upi-name{font-size:12px;color:var(--muted);margin-bottom:4px}
+.upi-amt{font-family:'Fraunces',serif;font-size:24px;font-weight:900;color:var(--fire);margin-bottom:12px}
+.upi-qr{width:180px;height:180px;margin:0 auto 14px;background:#fff;border-radius:var(--r);padding:6px}
+.upi-qr img{width:100%;height:100%;display:block}
 .upi-id-row{display:flex;align-items:center;justify-content:center;gap:8px;background:#fff;border:1.5px solid var(--border);border-radius:var(--r);padding:10px 14px;margin-bottom:10px;cursor:pointer;transition:border-color .15s}
 .upi-id-row:hover{border-color:var(--saffron)}
 .upi-id-val{font-family:'DM Mono',monospace;font-size:13px;font-weight:600;color:var(--ink)}
 .upi-copy-ic{font-size:15px;color:var(--muted)}
-.upi-name{font-size:12px;color:var(--muted);margin-bottom:4px}
-.upi-amt{font-family:'Fraunces',serif;font-size:22px;font-weight:900;color:var(--fire);margin-bottom:8px}
-.upi-apps{display:flex;justify-content:center;gap:10px;margin:10px 0 4px}
-.upi-app-btn{display:flex;flex-direction:column;align-items:center;gap:4px;background:#fff;border:1.5px solid var(--border);border-radius:var(--r);padding:8px 14px;cursor:pointer;transition:all .15s;text-decoration:none;font-size:11px;font-weight:700;color:var(--ink2)}
+.upi-apps{display:flex;justify-content:center;gap:10px;margin:10px 0 6px}
+.upi-app-btn{display:flex;flex-direction:column;align-items:center;gap:4px;background:#fff;border:1.5px solid var(--border);border-radius:var(--r);padding:8px 14px;text-decoration:none;font-size:11px;font-weight:700;color:var(--ink2);transition:all .15s}
 .upi-app-btn:hover{border-color:var(--saffron);transform:translateY(-1px)}
-.upi-app-ic{font-size:22px}
-.upi-note{font-size:11px;color:var(--muted);line-height:1.5;margin-top:8px}
-.upi-steps{display:flex;flex-direction:column;gap:7px;margin-bottom:14px}
-.upi-step{display:flex;align-items:center;gap:10px;background:var(--bg2);border-radius:var(--r);padding:9px 12px;font-size:12.5px;color:var(--ink2)}
-.upi-step-n{width:22px;height:22px;border-radius:50%;background:var(--fire);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.upi-app-ic{font-size:20px}
+.upi-note{font-size:11px;color:var(--muted);line-height:1.5}
 .spbody{padding:36px 22px;text-align:center}
 .spinner{width:46px;height:46px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--fire);animation:spin .7s linear infinite;margin:0 auto 16px}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -301,7 +301,7 @@ button{font-family:inherit}
   </div>
 </div>
 
-<!-- UPI Payment Modal -->
+<!-- UPI Modal -->
 <div class="overlay" id="upiModal">
   <div class="modal">
     <div class="mpip"></div>
@@ -310,31 +310,27 @@ button{font-family:inherit}
       <button class="mx" id="upiModalClose">✕</button>
     </div>
     <div class="mbody">
-      <!-- Steps -->
       <div class="upi-steps">
-        <div class="upi-step"><div class="upi-step-n">1</div>Scan QR or copy UPI ID to pay</div>
-        <div class="upi-step"><div class="upi-step-n">2</div>Enter exact amount shown below</div>
-        <div class="upi-step"><div class="upi-step-n">3</div>Click "Confirm on WhatsApp" with screenshot</div>
+        <div class="upi-step"><div class="upi-step-n">1</div>Scan QR code or copy UPI ID below</div>
+        <div class="upi-step"><div class="upi-step-n">2</div>Pay the exact amount shown</div>
+        <div class="upi-step"><div class="upi-step-n">3</div>Tap "Confirm on WhatsApp" with screenshot</div>
       </div>
-      <!-- QR + UPI box -->
       <div class="upi-box">
         <div class="upi-name">Pay to · Zykaeats Kitchen</div>
         <div class="upi-amt" id="upiAmt">₹0</div>
-        <div class="upi-qr" id="upiQR"></div>
-        <div class="upi-id-row" id="upiIdRow" title="Click to copy">
+        <div class="upi-qr"><img id="upiQRImg" src="" alt="UPI QR Code"></div>
+        <div class="upi-id-row" id="upiIdRow">
           <span class="upi-id-val">glooka.llp2025@kotak</span>
-          <span class="upi-copy-ic">⎘</span>
+          <span class="upi-copy-ic" id="upiCopyIc">⎘</span>
         </div>
-        <!-- Deep links for UPI apps -->
         <div class="upi-apps">
           <a class="upi-app-btn" id="gpayLink" target="_blank"><span class="upi-app-ic">🟢</span>GPay</a>
           <a class="upi-app-btn" id="phonepeLink" target="_blank"><span class="upi-app-ic">🟣</span>PhonePe</a>
           <a class="upi-app-btn" id="paytmLink" target="_blank"><span class="upi-app-ic">🔵</span>Paytm</a>
         </div>
-        <div class="upi-note">📱 Open any UPI app → Scan QR or enter UPI ID<br>Make sure to pay the <strong>exact amount</strong></div>
+        <div class="upi-note">Open any UPI app → Scan QR or enter UPI ID → Pay exact amount</div>
       </div>
-      <!-- Confirm via WhatsApp -->
-      <button class="pb pb-wa" id="upiConfirmWABtn">💬 Confirm Payment on WhatsApp</button>
+      <button class="pb pb-wa" id="upiConfirmBtn">💬 Confirm Payment on WhatsApp</button>
     </div>
   </div>
 </div>
@@ -371,11 +367,13 @@ button{font-family:inherit}
 </div>
 
 <div id="toast"></div>
+
+
 <script>
 'use strict';
 
 /* ── CONFIG ── */
-let CFG={restaurantName:'Zykaeats Cloud Kitchen',whatsappNumber:'919876543210',freeDeliveryAt:299,deliveryFee:29,gstRate:0.05};
+let CFG={restaurantName:'Zykaeats Cloud Kitchen',whatsappNumber:'919876543210',razorpayKeyId:'',freeDeliveryAt:299,deliveryFee:29,gstRate:0.05,razorpayEnabled:false};
 
 /* ── MENU STATE ── */
 let MENU=[],CATS=[],activeCat='all';
@@ -511,7 +509,7 @@ async function sendWA(){
 }
 function openWADirect(){window.open(`https://wa.me/${CFG.whatsappNumber}?text=${encodeURIComponent("Hi! I'd like to place an order from Zykaeats 🍽")}`,'_blank');}
 
-/* ── UPI ── */
+/* ── UPI PAYMENT ── */
 const UPI_ID='glooka.llp2025@kotak';
 const UPI_NAME='Zykaeats Kitchen';
 let _upiOrderId='';
@@ -526,52 +524,43 @@ async function openUPIModal(){
   saveCust();
   const tot=orderTotal();
   _upiOrderId='ZKU-'+Date.now().toString(36).toUpperCase();
-
-  // Save order to backend
   try{
     await fetch('/api/orders/whatsapp',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({items:cartItems().map(i=>({id:i.id,name:i.name,price:i.price,qty:i.qty,emoji:i.emoji})),
       customer:_c,subtotal:subtotal(),deliveryFee:delivery(),gst:gstAmt(),total:tot})});
   }catch(_){}
-
-  // Set amount
-  document.getElementById('upiAmt').textContent=`₹${tot}`;
-
-  // Generate QR code via Google Charts API (no library needed)
-  const qrEl=document.getElementById('upiQR');
+  document.getElementById('upiAmt').textContent='₹'+tot;
   const upiUrl=buildUPIUrl(tot);
-  qrEl.innerHTML=`<img src="https://chart.googleapis.com/chart?cht=qr&chs=164x164&chl=${encodeURIComponent(upiUrl)}&choe=UTF-8" alt="UPI QR Code" style="width:164px;height:164px;display:block;margin:0 auto">`;
-
-  // Set UPI app deep links
+  const qrSrc='https://chart.googleapis.com/chart?cht=qr&chs=180x180&chl='+encodeURIComponent(upiUrl)+'&choe=UTF-8';
+  document.getElementById('upiQRImg').src=qrSrc;
   document.getElementById('gpayLink').href=upiUrl;
   document.getElementById('phonepeLink').href=upiUrl;
   document.getElementById('paytmLink').href=upiUrl;
-
   closeDrawer();
   openMod('upiModal');
 }
 
 function copyUPIId(){
   navigator.clipboard.writeText(UPI_ID).then(()=>{
-    const row=document.getElementById('upiIdRow');
-    row.querySelector('.upi-copy-ic').textContent='✓';
-    row.style.borderColor='var(--green)';
-    setTimeout(()=>{row.querySelector('.upi-copy-ic').textContent='⎘';row.style.borderColor='';},2000);
+    const ic=document.getElementById('upiCopyIc');
+    ic.textContent='✓';
+    document.getElementById('upiIdRow').style.borderColor='var(--green)';
+    setTimeout(()=>{ic.textContent='⎘';document.getElementById('upiIdRow').style.borderColor='';},2000);
   });
 }
 
 function confirmUPIOnWhatsApp(){
-  const tot=orderTotal()||document.getElementById('upiAmt').textContent.replace('₹','');
+  const tot=document.getElementById('upiAmt').textContent.replace('₹','');
   const ts=new Date().toLocaleString('en-IN',{dateStyle:'medium',timeStyle:'short'});
-  const lines=cartItems().map(i=>`  ${i.emoji||''} ${i.name} × ${i.qty}  —  ₹${i.price*i.qty}`).join('\n');
-  const msg=`💳 *UPI PAYMENT CONFIRMATION — ${UPI_NAME}*\n━━━━━━━━━━━━━━━━━━━━\n🔖 *Order:* \`${_upiOrderId}\`\n📅 ${ts}\n━━━━━━━━━━━━━━━━━━━━\n\n👤 *Customer*\nName:    ${_c.name||'—'}\nPhone:   ${_c.phone||'—'}\nAddress: ${_c.addr||'—'}${_c.note?'\n📝 Note: '+_c.note:''}\n━━━━━━━━━━━━━━━━━━━━\n🍽 *Order Items*\n${lines}\n━━━━━━━━━━━━━━━━━━━━\n*TOTAL PAID: ₹${tot}*\nUPI ID: ${UPI_ID}\n━━━━━━━━━━━━━━━━━━━━\n✅ I have completed the UPI payment. Please confirm! 🙏\n\n_Via zykaeats.in_`;
-  window.open(`https://wa.me/${CFG.whatsappNumber}?text=${encodeURIComponent(msg)}`,'_blank');
+  const lines=cartItems().map(i=>`  ${i.emoji||''} ${i.name} x ${i.qty}  —  Rs.${i.price*i.qty}`).join('\n');
+  const msg=`💳 *UPI PAYMENT — ${UPI_NAME}*\n━━━━━━━━━━━━━━━━━━━━\n🔖 *Order:* ${_upiOrderId}\n📅 ${ts}\n━━━━━━━━━━━━━━━━━━━━\n👤 *Customer*\nName: ${_c.name||'—'}\nPhone: ${_c.phone||'—'}\nAddress: ${_c.addr||'—'}${_c.note?'\nNote: '+_c.note:''}\n━━━━━━━━━━━━━━━━━━━━\n🍽 *Items*\n${lines}\n━━━━━━━━━━━━━━━━━━━━\n*TOTAL PAID: Rs.${tot}*\nUPI ID: ${UPI_ID}\n━━━━━━━━━━━━━━━━━━━━\n✅ Payment done! Please confirm 🙏`;
+  window.open('https://wa.me/'+CFG.whatsappNumber+'?text='+encodeURIComponent(msg),'_blank');
   closeMod('upiModal');
   showSuccess(_upiOrderId);
 }
 
 /* ── SUCCESS ── */
-function showSuccess(id){document.getElementById('sucId').textContent=`Order ID: ${id}`;openMod('sucModal');cart={};_c={name:'',phone:'',addr:'',note:''};renderAll();}
+function showSuccess(id){document.getElementById('sucId').textContent='Order ID: '+id;openMod('sucModal');cart={};_c={name:'',phone:'',addr:'',note:''};renderAll();}
 function afterSuccess(){closeMod('sucModal');window.scrollTo({top:0,behavior:'smooth'});}
 
 /* ── TOAST ── */
@@ -581,7 +570,7 @@ function showToast(msg){const t=document.getElementById('toast');t.textContent=m
 /* ── MISC ── */
 function scrollToMenu(){document.getElementById('catBar').scrollIntoView({behavior:'smooth',block:'start'});}
 
-/* ── EVENT DELEGATION for dynamic cart & menu elements ── */
+/* ── EVENT DELEGATION ── */
 function handleDelegatedClick(e){
   const btn=e.target.closest('[data-action]');
   if(!btn)return;
@@ -596,35 +585,26 @@ document.getElementById('menuCol').addEventListener('click',handleDelegatedClick
 document.getElementById('cpInner').addEventListener('click',handleDelegatedClick);
 document.getElementById('mDIn').addEventListener('click',handleDelegatedClick);
 
-/* ── STATIC ELEMENT EVENT LISTENERS ── */
+/* ── STATIC LISTENERS ── */
 document.addEventListener('DOMContentLoaded',function(){
-  // Nav & hero
   document.getElementById('navCartBtn').addEventListener('click',openDrawer);
   document.getElementById('browsMenuBtn').addEventListener('click',scrollToMenu);
   document.getElementById('waDirectBtn').addEventListener('click',openWADirect);
-
-  // Mobile FAB & drawer
   document.getElementById('mFab').addEventListener('click',openDrawer);
   document.getElementById('mDOv').addEventListener('click',function(e){if(e.target===this)closeDrawer();});
-
-  // WhatsApp modal
   document.getElementById('waModal').addEventListener('click',function(e){if(e.target===this)closeMod('waModal');});
   document.getElementById('waModalClose').addEventListener('click',function(){closeMod('waModal');});
   document.getElementById('copyBtn').addEventListener('click',copyWA);
   document.getElementById('sendWABtn').addEventListener('click',sendWA);
-
-  // Success modal
   document.getElementById('orderMoreBtn').addEventListener('click',afterSuccess);
-
-  // UPI modal
   document.getElementById('upiModal').addEventListener('click',function(e){if(e.target===this)closeMod('upiModal');});
   document.getElementById('upiModalClose').addEventListener('click',function(){closeMod('upiModal');});
   document.getElementById('upiIdRow').addEventListener('click',copyUPIId);
-  document.getElementById('upiConfirmWABtn').addEventListener('click',confirmUPIOnWhatsApp);
+  document.getElementById('upiConfirmBtn').addEventListener('click',confirmUPIOnWhatsApp);
 });
 
-/* ── BOOTSTRAP ── */
-bootstrap();[
+/* ── FALLBACK MENU ── */
+const FALLBACK_MENU=[
   {id:'r1',cat:'biryani',emoji:'🍗',name:'Chicken Dum Biryani',desc:'Slow-cooked basmati with tender chicken, saffron & whole spices',price:280,badge:'best',badgeLabel:'Bestseller',available:true,sortOrder:1},
   {id:'r2',cat:'biryani',emoji:'🐑',name:'Mutton Biryani',desc:'Rich slow-cooked mutton with caramelised onions & rose water',price:360,available:true,sortOrder:2},
   {id:'r3',cat:'biryani',emoji:'🌱',name:'Veg Biryani',desc:'Fragrant basmati with seasonal vegetables, cashews & herbs',price:180,badge:'veg',badgeLabel:'Veg',available:true,sortOrder:3},
@@ -642,6 +622,7 @@ bootstrap();[
   {id:'d1',cat:'desserts',emoji:'🍮',name:'Gulab Jamun (3 pcs)',desc:'Milk-solid dumplings in rose-cardamom sugar syrup',price:80,badge:'veg',badgeLabel:'Veg',available:true,sortOrder:15},
 ];
 
+/* ── BOOTSTRAP ── */
 async function bootstrap(){
   try{
     const[cr,mr]=await Promise.all([fetch('/api/config'),fetch('/api/menu')]);
@@ -651,6 +632,7 @@ async function bootstrap(){
   if(!MENU.length){MENU=FALLBACK_MENU;CATS=[...new Set(MENU.map(m=>m.cat))];}
   renderCatBar();renderAll();
 }
+bootstrap();
 </script>
 </body>
 </html>
