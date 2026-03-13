@@ -395,8 +395,8 @@ function setQty(id,qty){if(qty<=0)delete cart[id];else cart[id]=qty;renderAll();
 function clearCart(){cart={};renderAll();}
 
 /* ── CUSTOMER ── */
-let _c={name:'',phone:'',addr:'',note:''};
-function saveCust(){const g=id=>(document.getElementById(id)||{}).value?.trim()||'';_c={name:g('cfName'),phone:g('cfPhone'),addr:g('cfAddr'),note:g('cfNote')};}
+let _c={name:'',phone:'',addr:'',maps:'',note:''};
+function saveCust(){const g=id=>(document.getElementById(id)||{}).value?.trim()||'';_c={name:g('cfName'),phone:g('cfPhone'),addr:g('cfAddr'),maps:g('cfMaps'),note:g('cfNote')};}
 function formValid(){saveCust();if(!_c.name){showToast('⚠️ Enter your name');return false;}if(!_c.addr){showToast('⚠️ Enter your address');return false;}if(!_c.phone){showToast('⚠️ Enter your phone');return false;}return true;}
 
 /* ── RENDER CATBAR ── */
@@ -454,6 +454,7 @@ function cartHTML(){
       <div><label class="cf-lbl">Your Name *</label><input class="cf-inp" id="cfName" placeholder="e.g. Priya Sharma" value="${esc(_c.name)}"></div>
       <div><label class="cf-lbl">Phone *</label><input class="cf-inp" id="cfPhone" placeholder="+91 98765 43210" type="tel" value="${esc(_c.phone)}"></div>
       <div><label class="cf-lbl">Delivery Address *</label><input class="cf-inp" id="cfAddr" placeholder="Flat, street, locality, Bangalore" value="${esc(_c.addr)}"></div>
+      <div><label class="cf-lbl">📍 Google Maps Link <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);font-size:10px">(optional but helps)</span></label><input class="cf-inp" id="cfMaps" placeholder="Paste maps.google.com/... link here" type="url" value="${esc(_c.maps)}"></div>
       <div><label class="cf-lbl">Instructions</label><input class="cf-inp" id="cfNote" placeholder="Less spicy, extra chutney…" value="${esc(_c.note)}"></div>
     </div>
     <div class="pw">
@@ -498,7 +499,7 @@ function buildWAMsg(){
   _pid='ZKW-'+Date.now().toString(36).toUpperCase();
   const ts=new Date().toLocaleString('en-IN',{dateStyle:'medium',timeStyle:'short'});
   const lines=items.map(i=>`  ${i.emoji} ${i.name} × ${i.qty}  —  ₹${i.price*i.qty}`).join('\n');
-  return`🔥 *NEW ORDER — ${CFG.restaurantName}*\n━━━━━━━━━━━━━━━━━━━━\n🔖 *Order:* \`${_pid}\`\n📅 ${ts}\n━━━━━━━━━━━━━━━━━━━━\n\n👤 *Customer*\nName:    ${_c.name||'—'}\nPhone:   ${_c.phone||'—'}\nAddress: ${_c.addr||'—'}${_c.note?'\n📝 Note: '+_c.note:''}\n━━━━━━━━━━━━━━━━━━━━\n🍽 *Order Items*\n${lines}\n━━━━━━━━━━━━━━━━━━━━\nSubtotal:   ₹${sub}\nDelivery:   ${del===0?'FREE 🎉':'₹'+del}\nGST (5%):   ₹${g}\n*TOTAL:     ₹${tot}*\n━━━━━━━━━━━━━━━━━━━━\nPlease confirm & share ETA 🙏\n\n_Via zykaeats.in_`;
+  return`🔥 *NEW ORDER — ${CFG.restaurantName}*\n━━━━━━━━━━━━━━━━━━━━\n🔖 *Order:* \`${_pid}\`\n📅 ${ts}\n━━━━━━━━━━━━━━━━━━━━\n\n👤 *Customer*\nName:    ${_c.name||'—'}\nPhone:   ${_c.phone||'—'}\nAddress: ${_c.addr||'—'}${_c.maps?'\n📍 Maps:  '+_c.maps:''}${_c.note?'\n📝 Note: '+_c.note:''}\n━━━━━━━━━━━━━━━━━━━━\n🍽 *Order Items*\n${lines}\n━━━━━━━━━━━━━━━━━━━━\nSubtotal:   ₹${sub}\nDelivery:   ${del===0?'FREE 🎉':'₹'+del}\nGST (5%):   ₹${g}\n*TOTAL:     ₹${tot}*\n━━━━━━━━━━━━━━━━━━━━\nPlease confirm & share ETA 🙏\n\n_Via zykaeats.in_`;
 }
 function openWAPreview(){if(!cartItems().length){showToast('Cart is empty!');return;}if(!formValid())return;document.getElementById('waText').textContent=buildWAMsg();closeDrawer();openMod('waModal');}
 function copyWA(){navigator.clipboard.writeText(document.getElementById('waText').textContent).then(()=>{const b=document.getElementById('copyBtn');b.textContent='✓ Copied!';b.classList.add('ok');setTimeout(()=>{b.textContent='⎘ Copy';b.classList.remove('ok');},2200);});}
@@ -686,14 +687,14 @@ function confirmUPIOnWhatsApp(){
   const tot=document.getElementById('upiAmt').textContent.replace('₹','');
   const ts=new Date().toLocaleString('en-IN',{dateStyle:'medium',timeStyle:'short'});
   const lines=cartItems().map(i=>`  ${i.emoji||''} ${i.name} x ${i.qty}  —  Rs.${i.price*i.qty}`).join('\n');
-  const msg=`💳 *UPI PAYMENT — ${UPI_NAME}*\n━━━━━━━━━━━━━━━━━━━━\n🔖 *Order:* ${_upiOrderId}\n📅 ${ts}\n━━━━━━━━━━━━━━━━━━━━\n👤 *Customer*\nName: ${_c.name||'—'}\nPhone: ${_c.phone||'—'}\nAddress: ${_c.addr||'—'}${_c.note?'\nNote: '+_c.note:''}\n━━━━━━━━━━━━━━━━━━━━\n🍽 *Items*\n${lines}\n━━━━━━━━━━━━━━━━━━━━\n*TOTAL PAID: Rs.${tot}*\nUPI ID: ${UPI_ID}\n━━━━━━━━━━━━━━━━━━━━\n✅ Payment done! Please confirm 🙏`;
+  const msg=`💳 *UPI PAYMENT — ${UPI_NAME}*\n━━━━━━━━━━━━━━━━━━━━\n🔖 *Order:* ${_upiOrderId}\n📅 ${ts}\n━━━━━━━━━━━━━━━━━━━━\n👤 *Customer*\nName: ${_c.name||'—'}\nPhone: ${_c.phone||'—'}\nAddress: ${_c.addr||'—'}${_c.maps?'\n📍 Maps: '+_c.maps:''}${_c.note?'\nNote: '+_c.note:''}\n━━━━━━━━━━━━━━━━━━━━\n🍽 *Items*\n${lines}\n━━━━━━━━━━━━━━━━━━━━\n*TOTAL PAID: Rs.${tot}*\nUPI ID: ${UPI_ID}\n━━━━━━━━━━━━━━━━━━━━\n✅ Payment done! Please confirm 🙏`;
   window.open('https://wa.me/'+CFG.whatsappNumber+'?text='+encodeURIComponent(msg),'_blank');
   closeMod('upiModal');
   showSuccess(_upiOrderId);
 }
 
 /* ── SUCCESS ── */
-function showSuccess(id){document.getElementById('sucId').textContent='Order ID: '+id;openMod('sucModal');cart={};_c={name:'',phone:'',addr:'',note:''};renderAll();}
+function showSuccess(id){document.getElementById('sucId').textContent='Order ID: '+id;openMod('sucModal');cart={};_c={name:'',phone:'',addr:'',maps:'',note:''};renderAll();}
 function afterSuccess(){closeMod('sucModal');window.scrollTo({top:0,behavior:'smooth'});}
 
 /* ── TOAST ── */
