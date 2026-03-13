@@ -710,6 +710,8 @@ function makeQRMatrix(text,version,ec){
 }
 
 /* ── INVOICE ── */
+const UPI_ID='glooka.llp2025@kotak';
+const UPI_NAME='Zykaeats Kitchen';
 const SELLER={
   name:'Zykaeats Cloud Kitchen',
   legal:'GLOOKA FOODS LLP',
@@ -913,9 +915,8 @@ function getMyLocation(){
   );
 }
 
+
 /* ── UPI PAYMENT ── */
-const UPI_ID='glooka.llp2025@kotak';
-const UPI_NAME='Zykaeats Kitchen';
 let _upiOrderId='';
 
 function buildUPIUrl(amount){
