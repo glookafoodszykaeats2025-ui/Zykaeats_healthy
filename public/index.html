@@ -117,6 +117,13 @@ button{font-family:inherit}
 .os-tot{display:flex;justify-content:space-between;font-size:15px;font-weight:800;color:var(--ink);padding:3px 0}
 .cform{display:flex;flex-direction:column;gap:7px;margin-bottom:11px}
 .cf-lbl{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:3px}
+.loc-row{display:flex;gap:6px;align-items:center}
+.loc-row .cf-inp{flex:1}
+.loc-btn{flex-shrink:0;padding:8px 11px;background:var(--ink);color:#fff;border:none;border-radius:var(--r);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:background .15s;display:flex;align-items:center;gap:5px}
+.loc-btn:hover{background:var(--fire)}
+.loc-btn.loading{background:var(--muted);cursor:not-allowed}
+.loc-btn.success{background:var(--green)}
+.loc-status{font-size:10px;margin-top:3px;min-height:14px}
 .cf-inp{width:100%;background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--r);padding:8px 11px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--ink);outline:none;transition:border-color .15s,box-shadow .15s}
 .cf-inp:focus{border-color:var(--saffron);box-shadow:0 0 0 3px rgba(245,166,35,.13)}
 .cf-inp::placeholder{color:var(--muted)}
@@ -454,7 +461,13 @@ function cartHTML(){
       <div><label class="cf-lbl">Your Name *</label><input class="cf-inp" id="cfName" placeholder="e.g. Priya Sharma" value="${esc(_c.name)}"></div>
       <div><label class="cf-lbl">Phone *</label><input class="cf-inp" id="cfPhone" placeholder="+91 98765 43210" type="tel" value="${esc(_c.phone)}"></div>
       <div><label class="cf-lbl">Delivery Address *</label><input class="cf-inp" id="cfAddr" placeholder="Flat, street, locality, Bangalore" value="${esc(_c.addr)}"></div>
-      <div><label class="cf-lbl">📍 Google Maps Link <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);font-size:10px">(optional but helps)</span></label><input class="cf-inp" id="cfMaps" placeholder="Paste maps.google.com/... link here" type="url" value="${esc(_c.maps)}"></div>
+      <div><label class="cf-lbl">📍 Location <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);font-size:10px">(optional but helps)</span></label>
+        <div class="loc-row">
+          <input class="cf-inp" id="cfMaps" placeholder="Paste Maps link or use button →" type="url" value="${esc(_c.maps)}">
+          <button class="loc-btn" data-action="getloc" type="button">📍 Use My Location</button>
+        </div>
+        <div class="loc-status" id="locStatus" style="color:var(--muted)"></div>
+      </div>
       <div><label class="cf-lbl">Instructions</label><input class="cf-inp" id="cfNote" placeholder="Less spicy, extra chutney…" value="${esc(_c.note)}"></div>
     </div>
     <div class="pw">
@@ -644,6 +657,41 @@ function makeQRMatrix(text,version,ec){
   return m;
 }
 
+/* ── GEOLOCATION ── */
+function getMyLocation(){
+  const btn=document.querySelector('[data-action="getloc"]');
+  const status=document.getElementById('locStatus');
+  const input=document.getElementById('cfMaps');
+  if(!btn||!status||!input)return;
+  if(!navigator.geolocation){status.style.color='var(--red)';status.textContent='⚠️ Location not supported on this browser';return;}
+  btn.classList.add('loading');
+  btn.textContent='⏳ Fetching…';
+  status.style.color='var(--muted)';
+  status.textContent='Requesting location…';
+  navigator.geolocation.getCurrentPosition(
+    pos=>{
+      const{latitude:lat,longitude:lng}=pos.coords;
+      const mapsUrl=`https://maps.google.com/?q=${lat},${lng}`;
+      input.value=mapsUrl;
+      _c.maps=mapsUrl;
+      btn.classList.remove('loading');
+      btn.classList.add('success');
+      btn.textContent='✅ Got it!';
+      status.style.color='var(--green)';
+      status.textContent=`📍 ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+      setTimeout(()=>{btn.classList.remove('success');btn.textContent='📍 Use My Location';},3000);
+    },
+    err=>{
+      btn.classList.remove('loading');
+      btn.textContent='📍 Use My Location';
+      status.style.color='var(--red)';
+      const msgs={1:'Location permission denied. Please allow in browser settings.',2:'Location unavailable. Try again.',3:'Timed out. Please try again.'};
+      status.textContent='⚠️ '+(msgs[err.code]||'Could not get location');
+    },
+    {enableHighAccuracy:true,timeout:10000,maximumAge:0}
+  );
+}
+
 /* ── UPI PAYMENT ── */
 const UPI_ID='glooka.llp2025@kotak';
 const UPI_NAME='Zykaeats Kitchen';
@@ -714,6 +762,7 @@ function handleDelegatedClick(e){
   else if(action==='clear'){clearCart();}
   else if(action==='upi'){saveCust();openUPIModal();}
   else if(action==='whatsapp'){saveCust();openWAPreview();}
+  else if(action==='getloc'){getMyLocation();}
 }
 document.getElementById('menuCol').addEventListener('click',handleDelegatedClick);
 document.getElementById('cpInner').addEventListener('click',handleDelegatedClick);
