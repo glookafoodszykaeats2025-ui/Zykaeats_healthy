@@ -196,6 +196,23 @@ button{font-family:inherit}
 .ss{display:flex;flex-direction:column;align-items:center;gap:5px}
 .ss-ic{width:40px;height:40px;border-radius:50%;background:var(--bg2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:17px}
 .ss-lb{font-size:10px;color:var(--muted);font-weight:600;max-width:62px;text-align:center;line-height:1.4}
+/* ── NAV USER ── */
+.nav-login-btn{padding:7px 16px;border:1.5px solid var(--border);border-radius:100px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;transition:all .15s;white-space:nowrap}
+.nav-login-btn:hover{border-color:var(--fire);color:var(--fire)}
+.nav-user-chip{position:relative;display:flex;align-items:center;gap:8px;padding:5px 12px 5px 5px;background:var(--bg2);border:1.5px solid var(--border);border-radius:100px;cursor:pointer;transition:border-color .15s;user-select:none}
+.nav-user-chip:hover{border-color:var(--fire)}
+.nav-avatar{width:28px;height:28px;border-radius:50%;background:var(--fire);color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.nav-uname{font-size:13px;font-weight:600;color:var(--ink);max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nav-user-menu{position:absolute;top:calc(100% + 8px);right:0;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r2);box-shadow:var(--sh2);min-width:160px;z-index:400;overflow:hidden;opacity:0;pointer-events:none;transform:translateY(-6px);transition:opacity .15s,transform .15s}
+.nav-user-chip.menu-open .nav-user-menu{opacity:1;pointer-events:all;transform:translateY(0)}
+.num-item{padding:11px 16px;font-size:13px;font-weight:500;color:var(--ink);cursor:pointer;transition:background .12s}
+.num-item:hover{background:var(--bg2)}
+.num-logout{color:var(--red);border-top:1px solid var(--border)}
+/* ── OTP LOGIN ── */
+.otp-boxes{display:flex;gap:8px;justify-content:center;margin:4px 0 8px}
+.otp-box{width:44px;height:52px;text-align:center;font-size:22px;font-weight:700;font-family:'DM Mono',monospace;background:var(--bg2);border:2px solid var(--border);border-radius:var(--r);color:var(--ink);outline:none;transition:border-color .15s,box-shadow .15s;caret-color:var(--fire)}
+.otp-box:focus{border-color:var(--fire);box-shadow:0 0 0 3px rgba(232,72,26,.12)}
+.otp-box.filled{border-color:var(--fire);background:rgba(232,72,26,.06)}
 /* ── SIGNUP MODAL ── */
 .signup-modal{max-width:480px;overflow:hidden}
 .su-hero{background:linear-gradient(135deg,var(--ink) 0%,#2d2416 100%);padding:32px 24px 24px;text-align:center;position:relative}
@@ -226,6 +243,13 @@ button{font-family:inherit}
 .su-back-row{display:flex;gap:10px;align-items:center}
 .su-back{padding:13px 18px;background:var(--bg2);color:var(--ink);border:1.5px solid var(--border);border-radius:var(--r);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap}
 .su-back:hover{border-color:var(--border2);background:var(--border)}
+.su-loc-row{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.su-loc-btn{flex-shrink:0;padding:9px 13px;background:var(--ink);color:#fff;border:none;border-radius:var(--r);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:background .15s;display:flex;align-items:center;gap:5px}
+.su-loc-btn:hover{background:var(--fire)}
+.su-loc-btn.loading{background:var(--muted);cursor:not-allowed}
+.su-loc-btn.success{background:var(--green)}
+.su-loc-inp{flex:1;min-width:120px;padding:9px 12px}
+.su-loc-status{font-size:10px;margin-top:4px;min-height:14px;color:var(--muted)}
 /* ── INVOICE ── */
 .inv-modal{max-width:520px;max-height:90vh;overflow-y:auto}
 .inv-modal .mhd{position:sticky;top:0;z-index:2;background:var(--surface);border-bottom:1px solid var(--border)}
@@ -283,6 +307,17 @@ button{font-family:inherit}
 
 <nav id="nav">
   <div class="nav-brand">🔥 Zykaeats <span class="nav-tagline">Bangalore</span></div>
+  <div id="navUser" style="display:none">
+    <div class="nav-user-chip" id="navUserChip">
+      <div class="nav-avatar" id="navAvatar">?</div>
+      <span class="nav-uname" id="navUname">User</span>
+      <div class="nav-user-menu" id="navUserMenu">
+        <div class="num-item" id="numProfile">👤 My Profile</div>
+        <div class="num-item num-logout" id="numLogout">🚪 Logout</div>
+      </div>
+    </div>
+  </div>
+  <div id="navLoginBtn" class="nav-login-btn">Login</div>
   <button id="navCartBtn">
     🛒 Cart <span id="navBadge">0</span>
   </button>
@@ -437,6 +472,56 @@ button{font-family:inherit}
   </div>
 </div>
 
+<!-- Login Modal -->
+<div class="overlay" id="loginModal">
+  <div class="modal" style="max-width:400px">
+    <div class="mpip"></div>
+    <div class="mhd">
+      <div class="mtitle">🔐 Login to Zykaeats</div>
+      <button class="mx" id="loginModalClose">✕</button>
+    </div>
+    <div class="mbody">
+
+      <!-- Step 1: Enter phone -->
+      <div id="loginStep1">
+        <p style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.6">Enter your phone number and we'll send a 6-digit OTP via SMS.</p>
+        <div class="su-field" style="margin-bottom:14px">
+          <label class="su-lbl">Phone Number</label>
+          <div style="display:flex;gap:8px">
+            <span style="padding:9px 12px;background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--r);font-size:13.5px;color:var(--muted);white-space:nowrap">🇮🇳 +91</span>
+            <input class="su-inp" id="loginPhone" placeholder="98765 43210" type="tel" maxlength="10" style="flex:1">
+          </div>
+        </div>
+        <button class="su-next" id="loginSendOTP">Send OTP →</button>
+        <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:10px">New here? We'll create your account automatically.</p>
+      </div>
+
+      <!-- Step 2: Enter OTP -->
+      <div id="loginStep2" style="display:none">
+        <p style="font-size:13px;color:var(--muted);margin-bottom:6px;line-height:1.6">OTP sent to <strong id="loginPhoneDisplay"></strong></p>
+        <p style="font-size:11px;color:var(--muted);margin-bottom:16px">Check your SMS inbox. Valid for 10 minutes.</p>
+        <div class="su-field" style="margin-bottom:14px">
+          <label class="su-lbl">Enter 6-digit OTP</label>
+          <div class="otp-boxes" id="otpBoxes">
+            <input class="otp-box" maxlength="1" type="tel" data-idx="0">
+            <input class="otp-box" maxlength="1" type="tel" data-idx="1">
+            <input class="otp-box" maxlength="1" type="tel" data-idx="2">
+            <input class="otp-box" maxlength="1" type="tel" data-idx="3">
+            <input class="otp-box" maxlength="1" type="tel" data-idx="4">
+            <input class="otp-box" maxlength="1" type="tel" data-idx="5">
+          </div>
+        </div>
+        <button class="su-next" id="loginVerifyOTP">✓ Verify OTP</button>
+        <div style="display:flex;justify-content:space-between;margin-top:10px">
+          <button class="su-back" id="loginChangePhone" style="font-size:12px;padding:7px 12px">← Change number</button>
+          <button class="su-back" id="loginResendOTP" style="font-size:12px;padding:7px 12px" disabled>Resend OTP (<span id="resendTimer">30</span>s)</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 <!-- Signup Modal -->
 <div class="overlay" id="signupModal">
   <div class="modal signup-modal">
@@ -468,6 +553,15 @@ button{font-family:inherit}
           <div class="su-field">
             <label class="su-lbl">Delivery Address</label>
             <textarea class="su-inp su-ta" id="suAddr" placeholder="Flat no, building, street, locality, Bangalore" rows="2"></textarea>
+          </div>
+          <div class="su-field">
+            <label class="su-lbl">📍 Pin Your Location <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);font-size:10px">(optional but helps delivery)</span></label>
+            <div class="su-loc-row">
+              <button class="su-loc-btn" id="suLocBtn" type="button">📍 Use My Location</button>
+              <span style="font-size:11px;color:var(--muted)">or</span>
+              <input class="su-inp su-loc-inp" id="suMaps" placeholder="Paste Google Maps link" type="url">
+            </div>
+            <div class="su-loc-status" id="suLocStatus"></div>
           </div>
           <div class="su-field">
             <label class="su-lbl">State</label>
@@ -983,6 +1077,142 @@ function printInvoice(){
   setTimeout(()=>w.print(),600);
 }
 
+/* ── AUTH / OTP LOGIN ── */
+const SESSION_KEY='zke_session_v1';
+let _resendInterval=null;
+
+function getSession(){
+  try{return JSON.parse(localStorage.getItem(SESSION_KEY)||'null');}catch(e){return null;}
+}
+function setSession(data){
+  try{localStorage.setItem(SESSION_KEY,JSON.stringify(data));}catch(e){}
+}
+function clearSession(){
+  try{localStorage.removeItem(SESSION_KEY);}catch(e){}
+}
+
+function updateNavUser(){
+  const session=getSession();
+  const navUser=document.getElementById('navUser');
+  const navLoginBtn=document.getElementById('navLoginBtn');
+  if(session&&session.name){
+    navUser.style.display='flex';
+    navLoginBtn.style.display='none';
+    document.getElementById('navAvatar').textContent=session.name.charAt(0).toUpperCase();
+    document.getElementById('navUname').textContent=session.name.split(' ')[0];
+    // Pre-fill cart
+    _c.name=session.name||_c.name;
+    _c.phone=session.phone||_c.phone;
+    _c.addr=session.addr||_c.addr;
+    _c.maps=session.maps||_c.maps;
+  } else {
+    navUser.style.display='none';
+    navLoginBtn.style.display='flex';
+  }
+}
+
+function openLoginModal(){
+  // Reset to step 1
+  document.getElementById('loginStep1').style.display='block';
+  document.getElementById('loginStep2').style.display='none';
+  document.getElementById('loginPhone').value='';
+  clearOTPBoxes();
+  openMod('loginModal');
+}
+
+function clearOTPBoxes(){
+  document.querySelectorAll('.otp-box').forEach(b=>{b.value='';b.classList.remove('filled');});
+}
+
+function getOTPValue(){
+  return [...document.querySelectorAll('.otp-box')].map(b=>b.value).join('');
+}
+
+function startResendTimer(){
+  let secs=30;
+  const btn=document.getElementById('loginResendOTP');
+  const span=document.getElementById('resendTimer');
+  btn.disabled=true;
+  clearInterval(_resendInterval);
+  _resendInterval=setInterval(()=>{
+    secs--;span.textContent=secs;
+    if(secs<=0){clearInterval(_resendInterval);btn.disabled=false;btn.textContent='Resend OTP';}
+  },1000);
+}
+
+async function sendOTP(){
+  const raw=(document.getElementById('loginPhone').value||'').replace(/\D/g,'');
+  if(raw.length!==10){showToast('⚠️ Enter a valid 10-digit phone number');return;}
+  const btn=document.getElementById('loginSendOTP');
+  btn.textContent='Sending…';btn.disabled=true;
+  try{
+    const res=await fetch('/api/auth/send-otp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:raw})});
+    const data=await res.json();
+    if(res.ok&&data.ok){
+      document.getElementById('loginPhoneDisplay').textContent='+91 '+raw;
+      document.getElementById('loginStep1').style.display='none';
+      document.getElementById('loginStep2').style.display='block';
+      clearOTPBoxes();
+      document.querySelector('.otp-box').focus();
+      startResendTimer();
+    } else {
+      showToast('❌ '+(data.error||'Failed to send OTP'));
+    }
+  }catch(e){showToast('❌ Network error. Try again.');}
+  btn.textContent='Send OTP →';btn.disabled=false;
+}
+
+async function verifyOTP(){
+  const phone=(document.getElementById('loginPhone').value||'').replace(/\D/g,'');
+  const otp=getOTPValue();
+  if(otp.length!==6){showToast('⚠️ Enter the full 6-digit OTP');return;}
+  const btn=document.getElementById('loginVerifyOTP');
+  btn.textContent='Verifying…';btn.disabled=true;
+  try{
+    const res=await fetch('/api/auth/verify-otp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone,otp})});
+    const data=await res.json();
+    if(res.ok&&data.ok){
+      setSession({...data.user, loggedInAt:new Date().toISOString()});
+      closeMod('loginModal');
+      updateNavUser();
+      showToast(`👋 Welcome back, ${data.user.name.split(' ')[0]}!`);
+    } else {
+      showToast('❌ '+(data.error||'Invalid OTP'));
+      document.querySelectorAll('.otp-box').forEach(b=>{b.style.borderColor='var(--red)';});
+      setTimeout(()=>document.querySelectorAll('.otp-box').forEach(b=>{b.style.borderColor='';}),1200);
+    }
+  }catch(e){showToast('❌ Network error. Try again.');}
+  btn.textContent='✓ Verify OTP';btn.disabled=false;
+}
+
+function logout(){
+  clearSession();
+  document.getElementById('navUserChip').classList.remove('menu-open');
+  updateNavUser();
+  showToast('👋 Logged out successfully');
+}
+
+function initOTPBoxes(){
+  const boxes=document.querySelectorAll('.otp-box');
+  boxes.forEach((box,i)=>{
+    box.addEventListener('input',e=>{
+      const val=e.target.value.replace(/\D/g,'');
+      box.value=val;
+      box.classList.toggle('filled',val.length>0);
+      if(val&&i<boxes.length-1)boxes[i+1].focus();
+    });
+    box.addEventListener('keydown',e=>{
+      if(e.key==='Backspace'&&!box.value&&i>0){boxes[i-1].focus();boxes[i-1].value='';boxes[i-1].classList.remove('filled');}
+    });
+    box.addEventListener('paste',e=>{
+      e.preventDefault();
+      const pasted=(e.clipboardData||window.clipboardData).getData('text').replace(/\D/g,'');
+      [...pasted.slice(0,6)].forEach((ch,j)=>{if(boxes[j]){boxes[j].value=ch;boxes[j].classList.add('filled');}});
+      const next=Math.min(pasted.length,5);boxes[next].focus();
+    });
+  });
+}
+
 /* ── SIGNUP ── */
 const SIGNUP_KEY='zke_user_v1';
 
@@ -996,10 +1226,10 @@ function saveUser(data){
 function initSignup(){
   const user=loadUser();
   if(user){
-    // Pre-fill cart form with saved details
     _c.name=user.name||'';
     _c.phone=user.phone||'';
     _c.addr=user.addr||'';
+    _c.maps=user.maps||'';
     return; // already signed up
   }
   // Show after 800ms so page loads first
@@ -1025,20 +1255,53 @@ function suGoPage1(){
   document.getElementById('suStep1Dot').classList.add('active');
 }
 
+function suGetLocation(){
+  const btn=document.getElementById('suLocBtn');
+  const status=document.getElementById('suLocStatus');
+  const input=document.getElementById('suMaps');
+  if(!navigator.geolocation){status.style.color='var(--red)';status.textContent='⚠️ Location not supported on this browser';return;}
+  btn.classList.add('loading');btn.textContent='⏳ Fetching…';
+  status.style.color='var(--muted)';status.textContent='Requesting location…';
+  navigator.geolocation.getCurrentPosition(
+    pos=>{
+      const{latitude:lat,longitude:lng}=pos.coords;
+      input.value=`https://maps.google.com/?q=${lat},${lng}`;
+      btn._lat=lat;btn._lng=lng;
+      btn.classList.remove('loading');btn.classList.add('success');
+      btn.textContent='✅ Got it!';
+      status.style.color='var(--green)';
+      status.textContent=`📍 ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+      setTimeout(()=>{btn.classList.remove('success');btn.textContent='📍 Use My Location';},3000);
+    },
+    err=>{
+      btn.classList.remove('loading');btn.textContent='📍 Use My Location';
+      status.style.color='var(--red)';
+      const msgs={1:'Permission denied. Please allow location in browser.',2:'Location unavailable.',3:'Timed out. Try again.'};
+      status.textContent='⚠️ '+(msgs[err.code]||'Could not get location');
+    },
+    {enableHighAccuracy:true,timeout:10000,maximumAge:0}
+  );
+}
+
 function suSubmit(){
   const cuisines=[...document.querySelectorAll('.su-ctag.picked')].map(t=>t.dataset.cuisine);
+  const locBtn=document.getElementById('suLocBtn');
+  const mapsVal=(document.getElementById('suMaps').value||'').trim();
   const user={
     name:(document.getElementById('suName').value||'').trim(),
     phone:(document.getElementById('suPhone').value||'').trim(),
     email:(document.getElementById('suEmail').value||'').trim(),
     addr:(document.getElementById('suAddr').value||'').trim(),
     state:(document.getElementById('suState').value||''),
+    maps:mapsVal,
+    lat:locBtn._lat||null,
+    lng:locBtn._lng||null,
     cuisines,
     joinedAt:new Date().toISOString()
   };
   saveUser(user);
   // Pre-fill cart form
-  _c.name=user.name;_c.phone=user.phone;_c.addr=user.addr;
+  _c.name=user.name;_c.phone=user.phone;_c.addr=user.addr;_c.maps=user.maps||'';
   closeMod('signupModal');
   showToast(`👋 Welcome, ${user.name.split(' ')[0]}!`);
   // Send to backend
@@ -1170,6 +1433,7 @@ document.addEventListener('DOMContentLoaded',function(){
   document.getElementById('suNext1').addEventListener('click',suGoPage2);
   document.getElementById('suBack2').addEventListener('click',suGoPage1);
   document.getElementById('suSubmit').addEventListener('click',suSubmit);
+  document.getElementById('suLocBtn').addEventListener('click',suGetLocation);
   document.getElementById('suCuisines').addEventListener('click',function(e){
     const tag=e.target.closest('.su-ctag');if(!tag)return;
     tag.classList.toggle('picked');
@@ -1183,6 +1447,34 @@ document.addEventListener('DOMContentLoaded',function(){
     });
   },5000);
   document.getElementById('orderMoreBtn').addEventListener('click',afterSuccess);
+  // Auth
+  initOTPBoxes();
+  document.getElementById('navLoginBtn').addEventListener('click', openLoginModal);
+  document.getElementById('loginModalClose').addEventListener('click',()=>closeMod('loginModal'));
+  document.getElementById('loginModal').addEventListener('click',function(e){if(e.target===this)closeMod('loginModal');});
+  document.getElementById('loginSendOTP').addEventListener('click', sendOTP);
+  document.getElementById('loginVerifyOTP').addEventListener('click', verifyOTP);
+  document.getElementById('loginPhone').addEventListener('keydown',e=>{if(e.key==='Enter')sendOTP();});
+  document.getElementById('loginChangePhone').addEventListener('click',()=>{
+    document.getElementById('loginStep2').style.display='none';
+    document.getElementById('loginStep1').style.display='block';
+    clearInterval(_resendInterval);
+  });
+  document.getElementById('loginResendOTP').addEventListener('click',sendOTP);
+  document.getElementById('navUserChip').addEventListener('click',function(){this.classList.toggle('menu-open');});
+  document.addEventListener('click',function(e){
+    const chip=document.getElementById('navUserChip');
+    if(chip&&!chip.contains(e.target))chip.classList.remove('menu-open');
+  });
+  document.getElementById('numLogout').addEventListener('click', logout);
+  document.getElementById('numProfile').addEventListener('click',()=>{
+    document.getElementById('navUserChip').classList.remove('menu-open');
+    showToast('Profile page coming soon!');
+  });
+  updateNavUser();
+  // Nav login btn styling
+  document.getElementById('navLoginBtn').style.display='flex';
+  document.getElementById('navLoginBtn').style.alignItems='center';
   initSignup();
   document.getElementById('viewInvBtn').addEventListener('click',showInvoice);
   document.getElementById('invModalClose').addEventListener('click',function(){closeMod('invModal');});
