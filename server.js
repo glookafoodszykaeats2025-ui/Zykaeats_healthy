@@ -18,12 +18,11 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc:    ["'self'"],
-      scriptSrc:     ["'self'", "'unsafe-inline'", 'https://checkout.razorpay.com', 'https://fonts.googleapis.com'],
+      scriptSrc:     ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
       scriptSrcAttr: ["'unsafe-inline'"],
       styleSrc:      ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
       fontSrc:       ["'self'", 'https://fonts.gstatic.com'],
-      connectSrc:    ["'self'", 'https://api.razorpay.com'],
-      frameSrc:      ['https://api.razorpay.com'],
+      connectSrc:    ["'self'"],
       imgSrc:        ["'self'", 'data:', 'https:'],
     },
   },
@@ -31,20 +30,20 @@ app.use(helmet({
 
 app.use(cors({
   origin: process.env.NODE_ENV === 'production'
-    ? ['https://zykaeats.in', 'https://www.zykaeats.in']
+    ? ['https://zykaeats.in', 'https://www.zykaeats.in', /\.onrender\.com$/]
     : '*',
 }));
 
 // ── Rate limiting ───────────────────────────────────────
 const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,  // 15 minutes
+  windowMs: 15 * 60 * 1000,
   max: 100,
   standardHeaders: true,
   message: { error: 'Too many requests, please try again later' },
 });
 
 const orderLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000,  // 1 hour
+  windowMs: 60 * 60 * 1000,
   max: 20,
   message: { error: 'Too many orders from this IP, please try again later' },
 });
@@ -55,8 +54,8 @@ app.use(express.urlencoded({ extended: true }));
 
 // ── Serve static frontend ────────────────────────────────
 app.use(express.static(path.join(__dirname, 'public'), {
-  maxAge: process.env.NODE_ENV === 'production' ? '1d' : '0',
-  etag: true,
+  maxAge: '0',
+  etag: false,
 }));
 
 // ── Health check ─────────────────────────────────────────
@@ -65,20 +64,17 @@ app.get('/health', (req, res) => {
     status:    'ok',
     timestamp: new Date().toISOString(),
     env:       process.env.NODE_ENV,
-    razorpay:  !!process.env.RAZORPAY_KEY_ID && !process.env.RAZORPAY_KEY_ID.includes('XXXX'),
   });
 });
 
-// ── API config (public, safe to expose) ─────────────────
+// ── API config ───────────────────────────────────────────
 app.get('/api/config', (req, res) => {
   res.json({
-    restaurantName:      process.env.RESTAURANT_NAME || 'Zykaeats Cloud Kitchen',
-    whatsappNumber:      process.env.WHATSAPP_NUMBER || '919876543210',
-    razorpayKeyId:       process.env.RAZORPAY_KEY_ID || '',
-    freeDeliveryAt:      Number(process.env.FREE_DELIVERY_THRESHOLD) || 299,
-    deliveryFee:         Number(process.env.DELIVERY_FEE) || 29,
-    gstRate:             Number(process.env.GST_RATE) || 0.05,
-    razorpayEnabled:     !!(process.env.RAZORPAY_KEY_ID && !process.env.RAZORPAY_KEY_ID.includes('XXXX')),
+    restaurantName: process.env.RESTAURANT_NAME || 'Zykaeats Cloud Kitchen',
+    whatsappNumber: process.env.WHATSAPP_NUMBER || '919876543210',
+    freeDeliveryAt: Number(process.env.FREE_DELIVERY_THRESHOLD) || 299,
+    deliveryFee:    Number(process.env.DELIVERY_FEE) || 29,
+    gstRate:        Number(process.env.GST_RATE) || 0.05,
   });
 });
 
@@ -86,8 +82,8 @@ app.get('/api/config', (req, res) => {
 app.use('/api/menu',   apiLimiter, menuRouter);
 app.use('/api/orders', orderLimiter, ordersRouter);
 
-// ── Admin panel (serves admin.html for /admin path) ──────
-app.get('/admin*', (req, res) => {
+// ── Admin panel ──────────────────────────────────────────
+app.get('/admin', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
@@ -108,13 +104,7 @@ app.use((err, req, res, _next) => {
 
 // ── Start ─────────────────────────────────────────────────
 app.listen(PORT, () => {
-  console.log(`
-  ╔══════════════════════════════════════╗
-  ║  🔥 Zykaeats Server Running          ║
-  ║  http://localhost:${PORT}               ║
-  ║  ENV: ${(process.env.NODE_ENV || 'development').padEnd(29)}║
-  ╚══════════════════════════════════════╝
-  `);
+  console.log(`🔥 Zykaeats running on http://localhost:${PORT}`);
 });
 
 module.exports = app;
