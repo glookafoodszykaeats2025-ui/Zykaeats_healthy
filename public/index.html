@@ -232,7 +232,7 @@ button{font-family:inherit}
     <p class="h-p">Fresh, made-to-order food delivered across Bangalore. No aggregator fees — just great food at fair prices.</p>
     <div class="h-btns">
       <button class="btn btn-f" id="browsMenuBtn">🍽 Browse Menu</button>
-      <button class="btn btn-w" id="waDirectBtn">💬 WhatsApp Order</button>
+      <button class="btn btn-w" id="waDirectBtn">💬 WhatsApp Us</button>
     </div>
     <div class="h-stats">
       <div><div class="hs-n">4.8 ★</div><div class="hs-l">Avg rating</div></div>
@@ -474,6 +474,7 @@ function cartHTML(){
       <button class="pb pb-rzp" data-action="upi">💳 Pay ₹${tot} via UPI</button>
       <div class="pay-or">or</div>
       <button class="pb pb-wa" data-action="whatsapp">💬 Order via WhatsApp</button>
+      <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:2px">🔒 Prepaid only · No cash on delivery</div>
     </div>`;
   return`<div class="cp-hd"><span>Your Order${items.length?` (${itemCount()})`:''}</span>${items.length?`<button class="cp-clr" data-action="clear">Clear</button>`:''}</div>
     <div class="fbar"><div class="fb-r"><span class="fb-l">${fLbl}</span><span class="fb-v">₹${sub} / ₹${free}</span></div><div class="fb-t"><div class="fb-f" style="width:${pct}%"></div></div></div>
@@ -512,16 +513,16 @@ function buildWAMsg(){
   _pid='ZKW-'+Date.now().toString(36).toUpperCase();
   const ts=new Date().toLocaleString('en-IN',{dateStyle:'medium',timeStyle:'short'});
   const lines=items.map(i=>`  ${i.emoji} ${i.name} × ${i.qty}  —  ₹${i.price*i.qty}`).join('\n');
-  return`🔥 *NEW ORDER — ${CFG.restaurantName}*\n━━━━━━━━━━━━━━━━━━━━\n🔖 *Order:* \`${_pid}\`\n📅 ${ts}\n━━━━━━━━━━━━━━━━━━━━\n\n👤 *Customer*\nName:    ${_c.name||'—'}\nPhone:   ${_c.phone||'—'}\nAddress: ${_c.addr||'—'}${_c.maps?'\n📍 Maps:  '+_c.maps:''}${_c.note?'\n📝 Note: '+_c.note:''}\n━━━━━━━━━━━━━━━━━━━━\n🍽 *Order Items*\n${lines}\n━━━━━━━━━━━━━━━━━━━━\nSubtotal:   ₹${sub}\nDelivery:   ${del===0?'FREE 🎉':'₹'+del}\nGST (5%):   ₹${g}\n*TOTAL:     ₹${tot}*\n━━━━━━━━━━━━━━━━━━━━\nPlease confirm & share ETA 🙏\n\n_Via zykaeats.in_`;
+  return`🔥 *NEW ORDER — ${CFG.restaurantName}*\n━━━━━━━━━━━━━━━━━━━━\n🔖 *Order:* \`${_pid}\`\n📅 ${ts}\n━━━━━━━━━━━━━━━━━━━━\n\n👤 *Customer*\nName:    ${_c.name||'—'}\nPhone:   ${_c.phone||'—'}\nAddress: ${_c.addr||'—'}${_c.maps?'\n📍 Maps:  '+_c.maps:''}${_c.note?'\n📝 Note: '+_c.note:''}\n━━━━━━━━━━━━━━━━━━━━\n🍽 *Order Items*\n${lines}\n━━━━━━━━━━━━━━━━━━━━\nSubtotal:   ₹${sub}\nDelivery:   ${del===0?'FREE 🎉':'₹'+del}\nGST (5%):   ₹${g}\n*TOTAL:     ₹${tot}*\n━━━━━━━━━━━━━━━━━━━━\n⚠️ *Prepaid only — please pay via UPI before delivery*\nUPI ID: ${UPI_ID}\n━━━━━━━━━━━━━━━━━━━━\nPlease confirm & share ETA 🙏\n\n_Via zykaeats.in_`;
 }
 function openWAPreview(){if(!cartItems().length){showToast('Cart is empty!');return;}if(!formValid())return;document.getElementById('waText').textContent=buildWAMsg();closeDrawer();openMod('waModal');}
 function copyWA(){navigator.clipboard.writeText(document.getElementById('waText').textContent).then(()=>{const b=document.getElementById('copyBtn');b.textContent='✓ Copied!';b.classList.add('ok');setTimeout(()=>{b.textContent='⎘ Copy';b.classList.remove('ok');},2200);});}
 async function sendWA(){
-  try{await fetch('/api/orders/whatsapp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({items:cartItems().map(i=>({id:i.id,name:i.name,price:i.price,qty:i.qty})),customer:_c,subtotal:subtotal(),deliveryFee:delivery(),gst:gstAmt(),total:orderTotal()})});}catch(_){}
-  window.open(`https://wa.me/${CFG.whatsappNumber}?text=${encodeURIComponent(document.getElementById('waText').textContent)}`,'_blank');
+  try{await fetch('/api/orders/whatsapp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({items:cartItems().map(i=>({id:i.id,name:i.name,price:i.price,qty:i.qty,emoji:i.emoji})),customer:_c,subtotal:subtotal(),deliveryFee:delivery(),gst:gstAmt(),total:orderTotal()})});}catch(_){}
+  window.open('https://wa.me/'+CFG.whatsappNumber+'?text='+encodeURIComponent(document.getElementById('waText').textContent),'_blank');
   closeMod('waModal');showSuccess(_pid);
 }
-function openWADirect(){window.open(`https://wa.me/${CFG.whatsappNumber}?text=${encodeURIComponent("Hi! I'd like to place an order from Zykaeats 🍽")}`,'_blank');}
+function openWADirect(){window.open('https://wa.me/'+CFG.whatsappNumber+'?text='+encodeURIComponent("Hi! I'd like to place an order from Zykaeats 🍽"),'_blank');}
 
 /* ── QR CODE GENERATOR (pure JS, no external deps) ── */
 function drawQR(canvasId,text){
